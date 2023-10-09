@@ -1,6 +1,5 @@
 <template>
     <v-app>
-        <navbar></navbar>
         <v-main style="position: relative">
             <router-view :key="$route.fullPath" />
             <v-snackbar
@@ -29,19 +28,15 @@
                 </template>
             </v-snackbar>
         </v-main>
-        <!--<TheFooter v-if="route.name !== 'FeatureModel' && route.name !== 'Configurator'"></TheFooter>-->
     </v-app>
 </template>
 
 <script setup>
 import Navbar from '@/components/Navbar.vue';
-import TheFooter from '@/components/Footer.vue';
 import { useAppStore } from '@/store/app';
 import { storeToRefs } from 'pinia';
 import { useDisplay } from 'vuetify';
-import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const breakpoints = useDisplay();
 const appStore = useAppStore();
 

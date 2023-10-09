@@ -1,4 +1,5 @@
 <template>
+  <navbar></navbar>
   <div class="main">
     <!-- Loading screen -->
     <v-overlay
@@ -601,11 +602,12 @@ import { Feature } from '@/classes/Configurator/Feature';
 import { FeatureNodeConstraintItem } from '@/classes/Constraint/FeatureNodeConstraintItem';
 import { SelectionState } from '@/classes/Configurator/SelectionState';
 import { tr } from 'vuetify/locale';
+import Navbar from '@/components/Navbar.vue';
 
 export default {
   name: 'FeatureModelConfiguration',
 
-  components: {DoubleCheckbox, FeatureModelViewer},
+  components: { Navbar, DoubleCheckbox, FeatureModelViewer},
 
   data: () => ({
     headersVersions: [

@@ -1,4 +1,9 @@
 <template>
+  <navbar
+    @reset='resetCommand'
+    @undo='commandManager.undo()'
+    @redo='commandManager.redo()'
+  ></navbar>
   <v-container :fluid='true'>
 
     <!-- First row with the three columns: Versions, Features, Third Column (#SAT, Explanations, Configuration history) -->
@@ -101,41 +106,6 @@
                                   @select='(selection) => decisionPropagation(item.selectable, selection)' ></DoubleCheckbox>
                 </template>
 
-                <!-- Customization of the column ACTIONS -->
-<!--                <template v-slot:item.actions='{ item }'>
-                  &lt;!&ndash; Context menu &ndash;&gt;
-                  <v-menu
-                    v-if='!item.selectable.fix && (item.selectable.selectionState === SelectionState.ImplicitlyDeselected || item.selectable.selectionState === SelectionState.ImplicitlySelected)'
-                    offset-y>
-                    <template v-slot:activator='{ props }'>
-                      <v-btn icon outlined rounded v-bind='props'>
-                        <v-icon>mdi-dots-vertical</v-icon>
-                      </v-btn>
-                    </template>
-
-                    <v-list>
-                      &lt;!&ndash; Fix feature by rollback button &ndash;&gt;
-                      <v-list-item @click='rollbackFixFeature(item.selectable)'>
-                        <v-tooltip bottom>
-                          <template v-slot:activator='{ props }'>
-                            <div v-bind='props'>Rollback Fix</div>
-                          </template>
-                          <span>Rollback all steps in the configuration history until this implicit decision was made</span>
-                        </v-tooltip>
-                      </v-list-item>
-
-                      &lt;!&ndash; Fix feature by quick fix button &ndash;&gt;
-                      <v-list-item @click='quickFixFeature(item.selectable)'>
-                        <v-tooltip bottom>
-                          <template v-slot:activator='{ props }'>
-                            <div v-bind='props'>Quick Fix</div>
-                          </template>
-                          <span>Reselects the current config (versions and features) to allow a reselection of this feature</span>
-                        </v-tooltip>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
-                </template>-->
               </v-data-table>
             </v-window-item>
             <v-window-item key='treeView'>
@@ -146,7 +116,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols='5'>
+      <v-col cols='8'>
         <!-- Details of the selected version -->
         <v-card height='89.5vh'>
           <v-card-title>Details for {{featureModelName}}:</v-card-title>
@@ -155,6 +125,7 @@
           <v-tabs v-model='tabsSecondColumn'>
             <v-tab key='featureModelViewer'>Feature Model Viewer</v-tab>
             <v-tab key='ctc'>Cross Tree Constraints</v-tab>
+            <v-tab key='conf'>Configuration History</v-tab>
           </v-tabs>
 
           <v-card-text v-if='featureModelSolo?.root'>
@@ -207,163 +178,30 @@
                               size='30'></v-avatar>
                   </template>
 
-                  <!-- Customization of the column ACTIONS -->
-<!--                  <template v-slot:item.actions='{ item }'>
-                    &lt;!&ndash; Context menu &ndash;&gt;
-                    <v-menu v-if='item.selectable.evaluation === false'
-                            offset-y>
-                      <template v-slot:activator='{ props }'>
-                        <v-btn icon outlined rounded v-bind='props'>
-                          <v-icon>mdi-dots-vertical</v-icon>
-                        </v-btn>
-                      </template>
-
-                      <v-list>
-                        &lt;!&ndash; Fix ctc by rollback button &ndash;&gt;
-                        <v-list-item @click='rollbackFixCTC(item.selectable)'>
-                          <v-tooltip location='bottom'>
-                            <template v-slot:activator='{ props }'>
-                              <div v-bind='props'>Rollback Fix</div>
-                            </template>
-                            <span>Rollback all steps in the configuration history until this cross-tree constraint is valid or not invalid</span>
-                          </v-tooltip>
-                        </v-list-item>
-
-                        &lt;!&ndash; Fix ctc by quick fix button &ndash;&gt;
-                        <v-list-item @click='quickFixCTC(item.selectable)'>
-                          <v-tooltip location='bottom'>
-                            <template v-slot:activator='{ props }'>
-                              <div v-bind='props'>Quick Fix</div>
-                            </template>
-                            <span>Reselects the current config (versions and features) until this cross-tree constraint is valid</span>
-                          </v-tooltip>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
-                  </template>-->
-
                 </v-data-table>
               </v-window-item>
+              <v-window-item key='conf'>
+                    <v-data-table
+                      :headers="[{title: 'Description', key: 'description'}, {title: '# Possible configs', key: 'newSatCount'}]"
+                      :item-class="command => command.marked ? 'active-command clickable' : 'clickable'"
+                      :items='commandManager.commands'
+                      class='elevation-1'
+                      disable-filtering
+                      disable-pagination
+                      disable-sort
+                      fixed-header
+                      height='72vh'
+                      hide-default-footer
+                      single-select
+                      @click:row='redoCommand'
+                    >
+                    </v-data-table>
+                  </v-window-item>
             </v-window>
           </v-card-text>
         </v-card>
       </v-col>
-      <!-- Third column (#SAT, Explanations, Configuration history) -->
-      <v-col cols='3'>
-        <!-- #SAT -->
-        <v-card >
-          <v-card-title>{{ featureModelSolo.satCount }}</v-card-title>
-          <v-card-subtitle>Number of possible configurations</v-card-subtitle>
-          <v-card-actions>
 
-            <!-- Reset config button -->
-            <v-tooltip bottom>
-              <template v-slot:activator='{ props }'>
-                <v-btn
-                  outlined
-                  rounded
-                  v-bind='props'
-                  @click='resetCommand'>
-                  Reset Config
-                </v-btn>
-              </template>
-              <span>Reset all configuration steps and start with an empty selection. This step can be undone.</span>
-            </v-tooltip>
-
-            <!-- Undo button -->
-            <v-tooltip bottom>
-              <template v-slot:activator='{ props }'>
-                <v-btn
-                  :disabled='!commandManager.isUndoAvailable()'
-                  class='mx-2'
-                  icon
-                  outlined
-                  rounded
-                  v-bind='props'
-                  @click='commandManager.undo()'>
-                  <v-icon>mdi-undo</v-icon>
-                </v-btn>
-              </template>
-              <span>Undo last configuration step</span>
-            </v-tooltip>
-
-            <!-- Redo button -->
-            <v-tooltip bottom>
-              <template v-slot:activator='{ props }'>
-                <v-btn
-                  :disabled='!commandManager.isRedoAvailable()'
-                  icon
-                  outlined
-                  rounded
-                  v-bind='props'
-                  @click='commandManager.redo()'>
-                  <v-icon>mdi-redo</v-icon>
-                </v-btn>
-              </template>
-              <span>Redo last undone configuration step</span>
-            </v-tooltip>
-
-          </v-card-actions>
-          <v-layout class='align-center justify-center' row>
-            <v-btn class='ma-2' @click='openFileDialog'>
-              Open
-            </v-btn>
-            <v-btn class='ma-2' @click='save'>
-              Save Local Storage
-            </v-btn>
-            <v-btn class='ma-2' @click='downloadXML'>
-              Download
-            </v-btn>
-
-          </v-layout>
-          <v-layout class='align-center justify-center' row>
-            <v-btn v-if="featureModelName" class='ma-2' @click='openConfigFileDialog'>
-                Load Config
-            </v-btn>
-          </v-layout>
-        </v-card>
-
-        <!-- Explanations and configuration history -->
-        <v-card height='63vh' style='margin-top:1vh;'>
-          <v-card-title>
-            <v-tabs v-model='tabsColumnTopRight'>
-              <v-tab key='explanations'>Explanations</v-tab>
-              <v-tab key='configurationHistory'>Configuration history</v-tab>
-            </v-tabs>
-          </v-card-title>
-
-          <v-card-text>
-            <v-window v-model='tabsColumnTopRight' class='mt-2'>
-
-              <!-- Explanations tab -->
-              <v-window-item key='explanations' style='height: 25vh;'>
-                <div>
-                </div>
-              </v-window-item>
-
-              <!-- Configuration history tab -->
-              <v-window-item key='configurationHistory'>
-                <v-data-table
-                  :headers="[{title: 'Description', key: 'description'}, {title: '# Possible configs', key: 'newSatCount'}]"
-                  :item-class="command => command.marked ? 'active-command clickable' : 'clickable'"
-                  :items='commandManager.commands'
-                  class='elevation-1'
-                  disable-filtering
-                  disable-pagination
-                  disable-sort
-                  fixed-header
-                  height='47vh'
-                  hide-default-footer
-                  single-select
-                  @click:row='redoCommand'
-                >
-                </v-data-table>
-              </v-window-item>
-            </v-window>
-          </v-card-text>
-        </v-card>
-
-      </v-col>
     </v-row>
 
   </v-container>
@@ -406,11 +244,12 @@ import { ResetCommand } from '@/classes/Commands/SoloConfigurator/ResetCommand';
 import beautify from 'xml-beautifier';
 import { LoadConfigCommand } from '@/classes/Commands/SoloConfigurator/LoadConfigCommand';
 import { reColorNode } from '@/services/Configurator/update.service';
+import Navbar from '@/components/Navbar.vue';
 
 const appStore = useAppStore();
 export default {
   name: 'FeatureModelSoloConfigurator',
-  components: { ConfiguratorOpenFileDialog, FeatureModelViewerSolo, DoubleCheckbox },
+  components: { Navbar, ConfiguratorOpenFileDialog, FeatureModelViewerSolo, DoubleCheckbox },
 
   data: () => ({
     headersFeatures: [
@@ -554,7 +393,6 @@ export default {
       const command = new DecisionPropagationCommand(this.featureModelSolo, this.xml, item, selectionState);
       this.commandManager.execute(command);
       const featuresToColor = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.id);
-      reColorNode(this.$refs.featureModelViewerSolo.d3Data, featuresToColor)
     },
 
     resetCommand() {

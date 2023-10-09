@@ -1,18 +1,17 @@
-import { jsonToXML } from '@/services/xmlTranspiler.service';
 import axios, { CancelToken } from 'axios';
 import { NODE_CORE_COLOR, NODE_DEAD_COLOR, NODE_FALSEOP_COLOR } from '@/classes/constants';
 import { useAppStore } from '@/store/app';
 
-export async function getColorsFromService(featureModel, d3Data) {
+export async function getColorsFromService(xml, name, d3Data) {
     try {
         const source = CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel();
           // Timeout Logic
         }, 450);
-        const content = new TextEncoder().encode(jsonToXML(featureModel));
+        const content = new TextEncoder().encode(xml);
         let response = await axios.post(`${import.meta.env.VITE_APP_DOMAIN_FEATUREIDESERVICE}stats`, {
-          name: featureModel.id + ".xml",
+          name: name + ".xml",
           content: Array.from(content)
         }, {cancelToken: source.token});
         clearTimeout(timeout);
