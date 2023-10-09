@@ -1,8 +1,13 @@
 <template>
   <navbar
+    :file-is-loaded='FileIsLoaded'
     @reset='resetCommand'
     @undo='commandManager.undo()'
     @redo='commandManager.redo()'
+    @openFile='openFileDialog'
+    @openConf='openConfigFileDialog'
+    @localStorage='save'
+    @download='downloadXML'
   ></navbar>
   <v-container :fluid='true'>
 
@@ -436,6 +441,7 @@ export default {
       reader.addEventListener('load', (event) => {
         this.xml = event.target.result;
         this.featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
+        this.commandManager = new ConfiguratorManager();
         this.features = this.featureModelSolo.features;
         this.featureModelName = file[0].name.slice(0, file[0].name.length-4);
         this.featureModelSolo.name = this.featureModelName;
@@ -469,8 +475,13 @@ export default {
     tr() {
       return tr;
     },
+
     Feature() {
       return Feature;
+    },
+
+    FileIsLoaded() {
+      return this.featureModelName !== '';
     },
 
     FeatureNodeConstraintItem() {

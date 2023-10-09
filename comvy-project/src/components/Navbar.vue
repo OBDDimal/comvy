@@ -16,7 +16,7 @@
         <div class="hidden-sm-and-down ml-5">
             <v-btn
                 class="mx-1"
-                prepend-icon="mdi-file"
+                prepend-icon="mdi-menu"
                 @click='fileDrawer = !fileDrawer'
             >
                 File
@@ -30,15 +30,17 @@
             </v-btn>
             <v-btn
                   class="mx-1"
-                  icon="mdi-undo"
+                  prepend-icon="mdi-undo"
                   @click='$emit("undo")'
             >
+              Undo
             </v-btn>
             <v-btn
                   class="mx-1"
-                  icon="mdi-redo"
+                  prepend-icon="mdi-redo"
                   @click='$emit("redo")'
             >
+              Redo
             </v-btn>
         </div>
         <v-spacer></v-spacer>
@@ -58,7 +60,7 @@
             <v-btn
                 class="drawer-button"
                 icon="mdi-menu"
-                @click.stop="drawer = !drawer"
+                @click="drawer = !drawer"
             ></v-btn>
         </div>
         <div class="hidden-sm-and-down">
@@ -80,50 +82,42 @@
         </div>
     </v-app-bar>
     <v-navigation-drawer
-        class="mobile-navigation"
+        class="hidden-sm-and-down"
         v-model="fileDrawer"
         app
         temporary
+        width='15%'
     >
-        <v-list>
-            <v-list-item @click='$emit("openFile")'>
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-file-document-plus"></v-icon>
-                </template>
-                <v-list-item-title>Open a new File</v-list-item-title>
+        <v-list density='compact'>
+            <v-list-item @click='$emit("openFile")' prepend-icon="mdi-file-document-plus" title='Open a new File'>
             </v-list-item>
-            <v-list-item @click='$emit("openConf")'>
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-file-cog"></v-icon>
-                </template>
-                <v-list-item-title>Load Configuration</v-list-item-title>
+            <v-list-item @click='$emit("openConf")' v-if='props.fileIsLoaded'
+                prepend-icon="mdi-file-cog" title='Load Configuration'
+            >
             </v-list-item>
-            <v-list-item @click='$emit("localStorage")'>
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-content-save"></v-icon>
-                </template>
-                <v-list-item-title>Save to Local Storage</v-list-item-title>
+            <v-list-item @click='$emit("localStorage")' prepend-icon="mdi-content-save" title='Save to Local Storage'>
             </v-list-item>
-            <v-list-item @click='$emit("download")'>
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-download"></v-icon>
-                </template>
-                <v-list-item-title>Download Configuration</v-list-item-title>
+            <v-list-item @click='$emit("download")' prepend-icon="mdi-download" title='Download Configuration'>
             </v-list-item>
         </v-list>
     </v-navigation-drawer>
     <v-navigation-drawer
-        class="mobile-navigation"
+        class="hidden-md-and-up"
         v-model="drawer"
         app
         temporary
+        width='15%'
     >
         <v-list>
-            <v-list-item link to="/">
-                <template v-slot:prepend>
-                    <v-icon icon="mdi-home"></v-icon>
-                </template>
-                <v-list-item-title>Home</v-list-item-title>
+            <v-list-item @click='$emit("openFile")' prepend-icon="mdi-file-document-plus" title='Open a new File'>
+            </v-list-item>
+            <v-list-item @click='$emit("openConf")' v-if='props.fileIsLoaded'
+                prepend-icon="mdi-file-cog" title='Load Configuration'
+            >
+            </v-list-item>
+            <v-list-item @click='$emit("localStorage")' prepend-icon="mdi-content-save" title='Save to Local Storage'>
+            </v-list-item>
+            <v-list-item @click='$emit("download")' prepend-icon="mdi-download" title='Download Configuration'>
             </v-list-item>
         </v-list>
         <v-divider></v-divider>
@@ -152,6 +146,12 @@ const breakpoints = useDisplay();
 const theme = useTheme();
 const drawer = ref(false);
 const fileDrawer = ref(false)
+
+const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo'])
+
+const props = defineProps({
+  fileIsLoaded: Boolean,
+})
 
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark
