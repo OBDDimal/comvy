@@ -14,13 +14,32 @@
             variability.dev
         </v-app-bar-title>
         <div class="hidden-sm-and-down ml-5">
-            <v-btn
-                class="mx-1"
-                prepend-icon="mdi-menu"
-                @click='fileDrawer = !fileDrawer'
+            <v-menu
+      open-on-hover
+    >
+      <template v-slot:activator="{ props }">
+        <v-btn
+            class = "mx-1"
+            prepend-icon="mdi-menu"
+            v-bind="props"
+        >
+          File
+        </v-btn>
+      </template>
+
+      <v-list density='compact'>
+            <v-list-item @click='$emit("openFile")' prepend-icon="mdi-file-document-plus" title='Open Feature Model'>
+            </v-list-item>
+            <v-list-item @click='$emit("openConf")' v-if='props.fileIsLoaded'
+                prepend-icon="mdi-file-cog" title='Load Configuration'
             >
-                File
-            </v-btn>
+            </v-list-item>
+            <v-list-item @click='$emit("localStorage")' v-if='props.fileIsLoaded' prepend-icon="mdi-content-save" title='Save Configuration to Local Storage'>
+            </v-list-item>
+            <v-list-item @click='$emit("download")' v-if='props.fileIsLoaded' prepend-icon="mdi-download" title='Download Configuration'>
+            </v-list-item>
+        </v-list>
+    </v-menu>
             <v-btn
                   class="mx-1"
                   prepend-icon="mdi-reload"
@@ -81,61 +100,6 @@
             </v-btn>
         </div>
     </v-app-bar>
-    <v-navigation-drawer
-        class="hidden-sm-and-down"
-        v-model="fileDrawer"
-        app
-        temporary
-        width='15%'
-    >
-        <v-list density='compact'>
-            <v-list-item @click='$emit("openFile")' prepend-icon="mdi-file-document-plus" title='Open a new File'>
-            </v-list-item>
-            <v-list-item @click='$emit("openConf")' v-if='props.fileIsLoaded'
-                prepend-icon="mdi-file-cog" title='Load Configuration'
-            >
-            </v-list-item>
-            <v-list-item @click='$emit("localStorage")' prepend-icon="mdi-content-save" title='Save to Local Storage'>
-            </v-list-item>
-            <v-list-item @click='$emit("download")' prepend-icon="mdi-download" title='Download Configuration'>
-            </v-list-item>
-        </v-list>
-    </v-navigation-drawer>
-    <v-navigation-drawer
-        class="hidden-md-and-up"
-        v-model="drawer"
-        app
-        temporary
-        width='15%'
-    >
-        <v-list>
-            <v-list-item @click='$emit("openFile")' prepend-icon="mdi-file-document-plus" title='Open a new File'>
-            </v-list-item>
-            <v-list-item @click='$emit("openConf")' v-if='props.fileIsLoaded'
-                prepend-icon="mdi-file-cog" title='Load Configuration'
-            >
-            </v-list-item>
-            <v-list-item @click='$emit("localStorage")' prepend-icon="mdi-content-save" title='Save to Local Storage'>
-            </v-list-item>
-            <v-list-item @click='$emit("download")' prepend-icon="mdi-download" title='Download Configuration'>
-            </v-list-item>
-        </v-list>
-        <v-divider></v-divider>
-        <v-list>
-            <v-list-item class="mobile-theme-button" link @click="toggleTheme">
-                <template v-slot:prepend>
-                    <v-icon
-                        :icon="
-                            theme.global.current.value.dark
-                                ? 'mdi-brightness-7'
-                                : 'mdi-brightness-4'
-                        "
-                    ></v-icon>
-                </template>
-                <v-list-item-title>Switch theme</v-list-item-title>
-            </v-list-item>
-        </v-list>
-    </v-navigation-drawer>
 </template>
 
 <script setup>
