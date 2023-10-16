@@ -20,8 +20,12 @@ app.secret_key = os.urandom(32)
 
 cache.init_app(app)
 
-
 solvers = dict()
+
+
+@app.route('/', methods = ["GET", "POST"])
+def index():
+    return Response("Flask Analysis Backend Running", status = 200)
 
 
 @app.route('/register_formula', methods = ["POST"])

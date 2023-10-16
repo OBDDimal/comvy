@@ -4,3 +4,8 @@ services:
     command: npm run dev -- --host 0.0.0.0
     ports:
       - "3000:3000"
+  backend:
+    build: backend
+    command: python3 -m flask run --host=0.0.0.0
+    ports:
+      - "5000:5000"
