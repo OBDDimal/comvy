@@ -3,12 +3,17 @@ from os import path
 from flask import Flask, flash, request, Response, jsonify
 from flask_caching import Cache
 
+from werkzeug.utils import secure_filename
+
 from pysat.formula import CNF
 from pysat.solvers import Solver
 
 from tempfile import NamedTemporaryFile
 
 from copy import copy
+
+from flamapy.metamodels.fm_metamodel.transformations import FeatureIDEReader
+from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat, DimacsWriter
 
 UPLOAD_FOLDER = '/tmp/'
 
@@ -40,8 +45,17 @@ def register_file():
         flash("no file supplied")
         return Response("no file supplied", status = 422)
 
+    filename = secure_filename(file.filename)
+    _, ext = path.splitext(filename)
+
     persname = NamedTemporaryFile(dir = UPLOAD_FOLDER).name
     file.save(persname)
+
+    if ext == ".xml":
+        model = FeatureIDEReader(persname).transform()
+        print(model)
+        model = FmToPysat(model).transform()
+        DimacsWriter(persname, model).transform()
 
     ident = path.basename(persname)
 
