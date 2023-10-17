@@ -529,6 +529,12 @@ export default {
                     this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
                     this.initialResetCommand.execute();
                 } catch (e) {
+                    appStore.updateSnackbar(
+                        'Could not load the feature model.',
+                        'error',
+                        5000,
+                        true
+                    );
                     this.fmIsLoaded = false;
                 } finally {
                 }
@@ -540,10 +546,19 @@ export default {
         openConfig(file) {
             let reader = new FileReader();
             reader.addEventListener('load', (event) => {
-                const features = FeatureModelSolo.loadXmlDataFromConfig(event.target.result);
+                try {
+                    const features = FeatureModelSolo.loadXmlDataFromConfig(event.target.result);
 
-                const command = new LoadConfigCommand(this.featureModelSolo, this.xml, features);
-                this.commandManager.execute(command);
+                    const command = new LoadConfigCommand(this.featureModelSolo, this.xml, features);
+                    this.commandManager.execute(command);
+                } catch (e) {
+                    appStore.updateSnackbar(
+                        'Could not load the configuration file.',
+                        'error',
+                        5000,
+                        true
+                    );
+                }
             });
             reader.readAsText(file[0]);
             this.showOpenConfigDialog = false;
