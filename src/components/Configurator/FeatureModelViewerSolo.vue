@@ -2,6 +2,16 @@
     <div id="svg-container"></div>
 </template>
 
+<script setup>
+function refresh() {
+    this.resetView(4,3);
+}
+
+defineExpose({
+  refresh
+});
+</script>
+
 <script>
 import * as update from '@/services/Configurator/update.service.js'
 import * as init from '@/services/FeatureModel/init.service.js'
@@ -60,8 +70,9 @@ export default {
       this.d3Data.root = undefined;
       this.d3Data.nodeIdCounter = 0;
       this.init();
-    }
+    },
   },
+
 
   methods: {
     init() {

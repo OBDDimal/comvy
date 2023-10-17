@@ -229,9 +229,10 @@
         </template>
         <template v-else>
             <v-card :class="{ 'grey lighten-2': dragover }"
+                    :color="dragover ? 'grey-lighten-1': ''"
                     class="d-flex align-center justify-center"
                     height='89.5vh'
-                    :color="dragover ? 'grey-lighten-1': ''"
+                    @click="openFilePicker"
                     @drop.prevent="onFileDrop($event)"
                     @dragover.prevent="dragover = true"
                     @dragenter.prevent="dragover = true"
@@ -239,20 +240,31 @@
             >
                 <v-card-text>
                     <v-row :dense="true" align="center" class="d-flex flex-column">
-                        <v-icon class="mt-5" size="60">
+                        <v-icon class="mt-5" size="100">
                             mdi-cloud-upload
                         </v-icon>
-                        <p>
-                            Drop your file(s) here, or click to select them.
+                        <p class="text-h4">
+                            Drop your FeatureModel file here, or click to select it.
                         </p>
+                        <v-btn class="mt-6 text-h4 d-none" color="primary" rounded="xl" variant="text" @click.stop="">
+                            Or click here to load it from your local storage.
+                        </v-btn>
                     </v-row>
                 </v-card-text>
+                <input
+                        ref="filePicker"
+                        accept=".xml"
+                        class="d-none"
+                        type="file"
+                        @change="onFileInputChanged"
+                >
             </v-card>
         </template>
     </v-container>
 
     <configurator-open-file-dialog
             :show='showOpenDialog'
+            file-type="FeatureModel"
             @close='showOpenDialog = false'
             @open='(file) => openFile(file)'
     >
@@ -260,6 +272,7 @@
 
     <configurator-open-file-dialog
             :show='showOpenConfigDialog'
+            file-type="Configuration"
             @close='showOpenConfigDialog = false'
             @open='(file) => openConfig(file)'
     >
@@ -276,7 +289,7 @@ import {RollbackFixFeatureCommand} from '@/classes/Commands/Configurator/Rollbac
 import {RollbackFixVersionCommand} from '@/classes/Commands/Configurator/RollbackFixVersionCommand';
 import {RollbackFixCTCCommand} from '@/classes/Commands/Configurator/RollbackFixCTCCommand';
 import {DecisionPropagationCommand} from '@/classes/Commands/SoloConfigurator/DecisionPropagationCommand';
-import {tr} from 'vuetify/locale';
+import {ca, tr} from 'vuetify/locale';
 import api from '@/services/api.service';
 import {Feature} from '@/classes/Configurator/Feature';
 import {FeatureNodeConstraintItem} from '@/classes/Constraint/FeatureNodeConstraintItem';
@@ -476,27 +489,52 @@ export default {
             this.showOpenConfigDialog = true;
         },
 
-        openFile(file) {
+        openFilePicker() {
+            this.$refs.filePicker.click();
+        },
+
+        onFileInputChanged(e) {
+            if (e.target.files.length > 1) {
+                appStore.updateSnackbar(
+                    'Cannot load more than one feature model.',
+                    'error',
+                    5000,
+                    true
+                );
+            } else {
+                this.openFile(e.target.files);
+            }
+        },
+
+        openFile(files) {
+            console.log(hello)
+
             let reader = new FileReader();
             reader.addEventListener('load', (event) => {
-                this.xml = event.target.result;
-                this.featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
-                this.commandManager = new ConfiguratorManager();
-                this.features = this.featureModelSolo.features;
-                this.featureModelName = file[0].name.slice(0, file[0].name.length - 4);
-                this.featureModelSolo.name = this.featureModelName;
-                this.allConstraints = this.featureModelSolo.constraints.map((e) => ({
-                    constraint: e,
-                    formula: e.toList(),
-                    evaluation: e.evaluate()
-                }));
-                this.filteredConstraints = this.allConstraints;
-                this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
-                this.initialResetCommand.execute();
+                try {
+                    this.xml = event.target.result;
+                    const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
+                    this.commandManager = new ConfiguratorManager();
+                    this.features = featureModelSolo.features;
+                    this.featureModelName = files[0].name.slice(0, files[0].name.length - 4);
+                    featureModelSolo.name = this.featureModelName;
+                    this.allConstraints = featureModelSolo.constraints.map((e) => ({
+                        constraint: e,
+                        formula: e.toList(),
+                        evaluation: e.evaluate()
+                    }));
+                    this.fmIsLoaded = true;
+                    this.filteredConstraints = this.allConstraints;
+                    this.featureModelSolo = featureModelSolo;
+                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
+                    this.initialResetCommand.execute();
+                } catch (e) {
+                    this.fmIsLoaded = false;
+                } finally {
+                }
             });
-            reader.readAsText(file[0]);
+            reader.readAsText(files[0]);
             this.showOpenDialog = false;
-            this.fmIsLoaded = true;
         },
 
         openConfig(file) {
@@ -515,10 +553,10 @@ export default {
             this.dragover = false;
             if (event.dataTransfer.files.length > 1) {
                 appStore.updateSnackbar(
-                'Cannot load more than one feature model.',
-                'error',
-                5000,
-                true
+                    'Cannot load more than one feature model.',
+                    'error',
+                    5000,
+                    true
                 );
             } else {
                 this.openFile(event.dataTransfer.files);

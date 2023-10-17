@@ -3,7 +3,7 @@
     <v-dialog v-model="showDialog" persistent width="500">
       <v-card>
         <v-card-title class="text-h7 text-wrap">
-          Choose a FeatureModel or a FeatureIDE Configuration File
+          Please choose a {{fileType}} File:
         </v-card-title>
         <v-divider></v-divider>
         <v-form fast-fail @submit.prevent="open">
@@ -45,6 +45,7 @@ export default {
 
   props: {
     show: Boolean,
+    fileType: String,
   },
 
   watch: {
