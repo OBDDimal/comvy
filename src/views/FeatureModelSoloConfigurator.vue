@@ -507,7 +507,6 @@ export default {
         },
 
         openFile(files) {
-            console.log(hello)
 
             let reader = new FileReader();
             reader.addEventListener('load', (event) => {
