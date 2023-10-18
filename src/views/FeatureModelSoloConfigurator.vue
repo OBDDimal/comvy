@@ -246,7 +246,7 @@
                         <p class="text-h4">
                             Drop your FeatureModel file here, or click to select it.
                         </p>
-                        <v-btn class="mt-6 text-h4 d-none" color="primary" rounded="xl" variant="text" @click.stop="">
+                        <v-btn class="mt-6 text-h4 " color="primary" rounded="xl" variant="text" @click.stop="">
                             Or click here to load it from your local storage.
                         </v-btn>
                     </v-row>
@@ -522,7 +522,7 @@ export default {
                         formula: e.toList(),
                         evaluation: e.evaluate()
                     }));
-                    this.fmIsLoaded = true;
+
                     this.filteredConstraints = this.allConstraints;
                     this.featureModelSolo = featureModelSolo;
                     this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
@@ -538,6 +538,7 @@ export default {
                 } finally {
                 }
             });
+            this.fmIsLoaded = true;
             reader.readAsText(files[0]);
             this.showOpenDialog = false;
         },
