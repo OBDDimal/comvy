@@ -74,7 +74,7 @@ export class FeatureModelSolo {
                     feature,
                     parent,
                     featureName,
-                    child.tagName,
+                    child.tagName === 'feature' ? 'and' : child.tagName,
                     child.getAttribute('mandatory') === 'true',
                     child.getAttribute('abstract') === 'true'
                 );

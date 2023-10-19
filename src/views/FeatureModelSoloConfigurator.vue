@@ -8,6 +8,7 @@
             @redo='commandManager.redo()'
             @reset='resetCommand'
             @undo='commandManager.undo()'
+            @theme="dark = !dark"
     ></navbar>
     <v-container :fluid='true'>
         <template v-if="fmIsLoaded">
@@ -156,6 +157,7 @@
                                 <!-- Feature Model Viewer -->
                                 <v-window-item key='featureModelViewer'>
                                     <feature-model-viewer-solo ref="featureModelViewerSolo"
+                                                               :dark='dark'
                                                                :feature-model='featureModelSolo'></feature-model-viewer-solo>
                                 </v-window-item>
 
@@ -329,6 +331,7 @@ export default {
         tabsSecondColumn: undefined,
         showOpenDialog: false,
         showOpenConfigDialog: false,
+        dark: false,
         xml: undefined
     }),
 

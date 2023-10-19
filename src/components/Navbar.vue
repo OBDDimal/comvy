@@ -114,7 +114,7 @@ const theme = useTheme();
 const drawer = ref(false);
 const fileDrawer = ref(false)
 
-const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo'])
+const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo', 'theme'])
 
 const props = defineProps({
     fileIsLoaded: Boolean,
@@ -122,7 +122,8 @@ const props = defineProps({
 
 function toggleTheme() {
     theme.global.name.value = theme.global.current.value.dark
-        ? 'light'
-        : 'dark';
+        ? 'variabilityLightTheme'
+        : 'variabilityDarkTheme';
+    emit("theme")
 }
 </script>

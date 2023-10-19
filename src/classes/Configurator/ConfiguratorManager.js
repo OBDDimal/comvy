@@ -1,3 +1,5 @@
+import {updateSvg} from "@/services/Configurator/update.service";
+
 export class ConfiguratorManager {
     constructor() {
         this.commands = [];
@@ -20,6 +22,7 @@ export class ConfiguratorManager {
 
         // Reset stack of future commands because a new command was already executed.
         this.futureCommands = [];
+
     }
 
     undo() {

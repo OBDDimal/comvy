@@ -1,6 +1,8 @@
 import * as CONSTANTS from '../constants';
 import * as d3 from "d3";
 import {PseudoNode} from "@/classes/PseudoNode";
+import {variabilityDarkTheme, variabilityLightTheme} from "@/plugins/vuetify";
+import {SelectionState} from "@/classes/Configurator/SelectionState";
 
 export class FeatureNode {
     constructor(feature, parent, name, groupType, mandatory, abstract) {
@@ -21,20 +23,25 @@ export class FeatureNode {
 
         // D3 connection for drawing purposes
         this.displayName = this.feature.name.slice(0, CONSTANTS.DISPLAY_NAME_LENGTH) + '...';
-        this.colorValue = CONSTANTS.NODE_COLOR;
         this.isCollapsed = false;
         this.isHidden = false;
         this.d3Node = null;
         this.markedAsEdited = false;
     }
 
-    color() {
-        if (this.markedAsEdited) {
-            return CONSTANTS.NODE_EDITED_COLOR;
-        } else if (this.isAbstract) {
-            return CONSTANTS.NODE_ABSTRACT_COLOR;
+    color(dark = false) {
+        if (this.isAbstract) {
+            return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
+        } else if (this.feature.selectionState === SelectionState.ExplicitlySelected) {
+            return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
+        } else if (this.feature.selectionState === SelectionState.ImplicitlyDeselected) {
+            return dark ? variabilityDarkTheme.colors["imp-deselected"] : variabilityLightTheme.colors["imp-deselected"];
+        } else if (this.feature.selectionState === SelectionState.ExplicitlyDeselected) {
+            return dark ? variabilityDarkTheme.colors.deselected : variabilityLightTheme.colors.deselected;
+        } else if (this.feature.selectionState === SelectionState.ImplicitlySelected) {
+            return dark ? variabilityDarkTheme.colors["imp-selected"] : variabilityLightTheme.colors["imp-selected"];
         } else {
-            return this.colorValue;
+            return dark ? variabilityLightTheme.colors.primary : variabilityDarkTheme.colors.primary;
         }
     }
 

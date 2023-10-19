@@ -1,5 +1,6 @@
 import {Command} from "@/classes/Commands/Command";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
+import {updateSvg} from "@/services/Configurator/update.service";
 
 export class ConfigurationCommand extends Command {
     constructor(featureModel, xml) {
@@ -26,6 +27,7 @@ export class ConfigurationCommand extends Command {
         this.newUnselectedFeatures.forEach(f => f.selectionState = SelectionState.Unselected);
 
         this.featureModel.satCount = this.newSatCount;
+        updateSvg();
     }
 
     undo() {
@@ -36,6 +38,7 @@ export class ConfigurationCommand extends Command {
         this.oldUnselectedFeatures.forEach(f => f.selectionState = SelectionState.Unselected);
 
         this.featureModel.satCount = this.oldSatCount;
+        updateSvg();
     }
 
     unmarkChanges() {

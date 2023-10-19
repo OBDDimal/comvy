@@ -5,6 +5,8 @@ import {FeatureNode} from '@/classes/Configurator/FeatureNode';
 import {PseudoNode} from '@/classes/PseudoNode';
 import * as count from '@/services/FeatureModel/count.service';
 
+let d3DataSaved = undefined;
+
 function updateFeatureNodes(d3Data, visibleD3Nodes) {
     const featureNode = d3Data.container.featureNodesContainer
         .selectAll('g.node')
@@ -75,7 +77,7 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
         .select('rect')
         .classed('is-searched-feature', (d3Node) => d3Node.data.isSearched)
         .attr('id', (d3Node) => d3Node.data.name)
-        .attr('fill', (d3Node) => d3Node.data.color())
+        .attr('fill', (d3Node) => d3Node.data.color(d3Data.dark))
         .attr('x', (d3Node) =>
             d3Data.direction === 'v' ? -d3Node.width / 2 : 0
         )
@@ -92,9 +94,7 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
         )
         .attr('x', d3Data.direction === 'v' ? 0 : (d3Node) => d3Node.width / 2)
         .classed('whiteText', (d3Node) => {
-            let color = d3Node.data.color();
-            const rgb = color.replace(/[^\d,]/g, '').split(',');
-            return rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114 <= 186;
+            return d3Data.dark;
         })
         .text((d3Node) =>
             d3Data.isShortenedName ? d3Node.data.displayName : d3Node.data.feature.name
@@ -367,6 +367,12 @@ function updateSegments(d3Data, visibleD3Nodes) {
 }
 
 export function updateSvg(d3Data) {
+
+    if(d3Data === undefined) {
+        d3Data = d3DataSaved;
+    } else {
+        d3DataSaved = d3Data;
+    }
 
     // Calculate rect widths of all d3Nodes once for better performance instead of repeatedly during update.
     d3Data.root.descendants().forEach((d3Node) => {
