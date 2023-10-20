@@ -13,6 +13,9 @@ export class ConfigurationCommand extends Command {
         this.oldExplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected);
         this.oldImplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlyDeselected);
         this.oldUnselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.Unselected);
+        this.oldNotOpenFeatures = featureModel.features.filter(f => f.open === null);
+        this.oldOpenParentFeatures = featureModel.features.filter(f => f.open === false);
+        this.oldOpenChildrenFeatures = featureModel.features.filter(f => f.open === true);
 
         this.oldSatCount = this.featureModel.satCount;
 
@@ -25,6 +28,9 @@ export class ConfigurationCommand extends Command {
         this.newExplicitlyDeselectedFeatures.forEach(f => f.selectionState = SelectionState.ExplicitlyDeselected);
         this.newImplicitlyDeselectedFeatures.forEach(f => f.selectionState = SelectionState.ImplicitlyDeselected);
         this.newUnselectedFeatures.forEach(f => f.selectionState = SelectionState.Unselected);
+        this.newNotOpenFeatures.forEach(f => f.open = null)
+        this.newOpenParentFeatures.forEach(f => f.open = false);
+        this.newOpenChildrenFeatures.forEach(f => f.open = true);
 
         this.featureModel.satCount = this.newSatCount;
         updateSvg();
@@ -36,6 +42,9 @@ export class ConfigurationCommand extends Command {
         this.oldExplicitlyDeselectedFeatures.forEach(f => f.selectionState = SelectionState.ExplicitlyDeselected);
         this.oldImplicitlyDeselectedFeatures.forEach(f => f.selectionState = SelectionState.ImplicitlyDeselected);
         this.oldUnselectedFeatures.forEach(f => f.selectionState = SelectionState.Unselected);
+        this.oldNotOpenFeatures.forEach(f => f.open = null)
+        this.oldOpenParentFeatures.forEach(f => f.open = false);
+        this.oldOpenChildrenFeatures.forEach(f => f.open = true);
 
         this.featureModel.satCount = this.oldSatCount;
         updateSvg();

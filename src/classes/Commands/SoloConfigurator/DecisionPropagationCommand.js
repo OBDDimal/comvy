@@ -44,13 +44,17 @@ export class DecisionPropagationCommand extends ConfigurationCommand {
               }))
                 .then((d) => {
                     const data = d.data;
-                    this.newSatCount = this.formatScientificNotation(data.satCount);
+                    this.newSatCount = 0;
 
                     this.newExplicitlySelectedFeatures = this.featureModel.features.filter(f => selection.includes(f.name))
                     this.newImplicitlySelectedFeatures = this.featureModel.features.filter(f => data.impliedSelection.includes(f.name))
                     this.newExplicitlyDeselectedFeatures = this.featureModel.features.filter(f => deselection.includes(f.name))
                     this.newImplicitlyDeselectedFeatures = this.featureModel.features.filter(f => data.impliedDeselection.includes(f.name))
                     this.newUnselectedFeatures = this.featureModel.features.filter(f => !(selection.includes(f.name) || data.impliedSelection.includes(f.name) || deselection.includes(f.name) || data.impliedDeselection.includes(f.name)))
+                    this.newOpenParentFeatures = this.featureModel.features.filter(f => data.openParents.includes(f.name));
+                    this.newOpenChildrenFeatures = this.featureModel.features.filter(f => data.openChildren.includes(f.name));
+                    this.newNotOpenFeatures = this.featureModel.features.filter(f => !data.openChildren.includes(f.name) || !data.openParents.includes(f.name));
+
 
                     this.executed = true;
                     super.execute();

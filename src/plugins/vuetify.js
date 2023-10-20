@@ -21,7 +21,8 @@ export const variabilityLightTheme = {
         'imp-selected': '#007600',
         deselected: '#ff210d',
         'imp-deselected': '#c50000',
-        'should-select': '#ffff0d'
+        'should-select': '#cca000',
+        'should-select-parent': '#c46300'
     },
 }
 
@@ -41,7 +42,8 @@ export const variabilityDarkTheme = {
         'imp-selected': '#277800',
         deselected: '#fe0058',
         'imp-deselected': '#9d004d',
-        'should-select': '#f7e92a',
+        'should-select': '#ff5d1b',
+        'should-select-parent': '#cc3a00',
     },
 }
 

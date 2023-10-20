@@ -370,7 +370,6 @@ export default {
 
         save() {
             localStorage.featureModelData = this.featureModelSolo.parseToConfig();
-            console.log(this.featureModelSolo.parseToConfig());
             window.onbeforeunload = null;
 
             appStore.updateSnackbar(
@@ -450,7 +449,6 @@ export default {
         },
 
         decisionPropagation(item, selectionState) {
-            console.log(item)
             const command = new DecisionPropagationCommand(this.featureModelSolo, this.xml, item, selectionState);
             this.commandManager.execute(command);
             const featuresToColor = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.id);

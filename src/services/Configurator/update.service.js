@@ -94,7 +94,7 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
         )
         .attr('x', d3Data.direction === 'v' ? 0 : (d3Node) => d3Node.width / 2)
         .classed('whiteText', (d3Node) => {
-            return d3Data.dark;
+            return !d3Data.dark;
         })
         .text((d3Node) =>
             d3Data.isShortenedName ? d3Node.data.displayName : d3Node.data.feature.name

@@ -62,7 +62,8 @@ export default {
   }),
 
   mounted() {
-    this.init();
+      this.d3Data.dark = this.dark;
+      this.init();
   },
 
   watch: {
@@ -71,7 +72,6 @@ export default {
       this.d3Data.flexLayout = undefined;
       this.d3Data.root = undefined;
       this.d3Data.nodeIdCounter = 0;
-      this.d3Data.dark = this.dark;
       this.init();
     },
       dark() {
@@ -84,7 +84,7 @@ export default {
   methods: {
     init() {
       init.initialize(this.d3Data, this.featureModel.root, true)
-      this.resetView(4, 3);
+      this.resetView(10, 10);
     },
     resetView(levels, maxChildren) {
       view.reset(this.d3Data, levels, maxChildren)

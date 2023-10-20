@@ -30,9 +30,13 @@ export class FeatureNode {
     }
 
     color(dark = false) {
-        if (this.isAbstract) {
-            return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
-        } else if (this.feature.selectionState === SelectionState.ExplicitlySelected) {
+        if (this.feature.open) {
+            return dark ? variabilityDarkTheme.colors["should-select"] : variabilityLightTheme.colors["should-select"];
+        } else if (this.feature.open !== null) {
+            return dark ? variabilityDarkTheme.colors["should-select-parent"] : variabilityLightTheme.colors["should-select-parent"];
+        } else if (this.isAbstract) {
+            return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
+        }else if (this.feature.selectionState === SelectionState.ExplicitlySelected) {
             return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
         } else if (this.feature.selectionState === SelectionState.ImplicitlyDeselected) {
             return dark ? variabilityDarkTheme.colors["imp-deselected"] : variabilityLightTheme.colors["imp-deselected"];
@@ -41,7 +45,7 @@ export class FeatureNode {
         } else if (this.feature.selectionState === SelectionState.ImplicitlySelected) {
             return dark ? variabilityDarkTheme.colors["imp-selected"] : variabilityLightTheme.colors["imp-selected"];
         } else {
-            return dark ? variabilityLightTheme.colors.primary : variabilityDarkTheme.colors.primary;
+            return dark ? variabilityDarkTheme.colors.primary : variabilityLightTheme.colors.primary;
         }
     }
 
