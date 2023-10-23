@@ -5,8 +5,8 @@ Simple analysis backend built with [Flask](https://flask.palletsprojects.com) an
 ## Routes
 ### Registering and Lookup
 
-* `/register_formula`: Register a formula in DIMACS format 
-    * Returns `417` when the file is not valid DIMACS
+* `/register_formula`: Register a formula in DIMACS or FeatureIDE XML format
+    * Returns `417` when the file is neither a valid DIMACS nor a valid FeatureIDE XML
     * Returns `422` if no file is supplied
     * Returns `200` and key `ident` for further actions on the formula
    > Example: `curl -i -X POST -F file=@<file> localhost:5000/register_formula`
