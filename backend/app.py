@@ -53,6 +53,9 @@ def ids2names(self, ls):
 
     mapping = self.mapping
 
+    if len(ls) == 0:
+        return ls
+
     if type(ls[0]) == list:
         return [ids2names(l) for l in ls]
     elif type(ls[0]) == int:
@@ -65,6 +68,9 @@ def names2ids(self, ls):
 
     mapping = self.backmap
 
+    if len(ls) == 0:
+        return ls
+        
     if type(ls[0]) == list:
         return [names2ids(l) for l in ls]
     elif type(ls[0]) == str:
@@ -104,12 +110,10 @@ def register_file():
 
     if ext == ".xml":
         model = FeatureIDEReader(persname).transform()
-        print(model)
         model = FmToPysat(model).transform()
         DimacsWriter(persname, model).transform()
 
     ident = path.basename(persname)
-    ident = "abc"
 
     try:
         formula = CNF(from_file = persname)
@@ -266,13 +270,16 @@ def deadcore(ident, raw = True):
                 solver.add_clause([x])
                 cores.add(x)
 
+    cores = sorted(cores)
+    deads = sorted(deads)
+
     if not raw:
         cores = formula.ids2names(cores)
         deads = formula.ids2names(deads)
 
     data = {
-        "cores": sorted(cores),
-        "deads": sorted(deads)
+        "cores": cores,
+        "deads": deads
     }
 
     return jsonify(data), 200
