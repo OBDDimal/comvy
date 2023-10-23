@@ -102,7 +102,7 @@
                                 <!-- Table with all features that are currently fitlered and searched -->
                                 <v-data-table
                                         :headers='headersFeatures'
-                                        :items='features'
+                                        :items='featuresTrimmed'
                                         :search='searchFeatures'
                                         disable-pagination
                                         fixed-header
@@ -323,6 +323,7 @@ export default {
         dragover: false,
         featureModelName: '',
         features: undefined,
+        featuresTrimmed: undefined,
         filteredConstraints: undefined,
         allConstraints: undefined,
         searchFeatures: '',
@@ -353,6 +354,7 @@ export default {
                         this.xml = beautify(rawData.data);
                         this.featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                         this.features = this.featureModelSolo.features;
+                        this.featuresTrimmed = this.features.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract)
                         this.featureModelName = data.data.label;
                         this.featureModelSolo.name = this.featureModelName;
                         this.allConstraints = this.featureModelSolo.constraints.map((e) => ({
@@ -451,7 +453,6 @@ export default {
         decisionPropagation(item, selectionState) {
             const command = new DecisionPropagationCommand(this.featureModelSolo, this.xml, item, selectionState);
             this.commandManager.execute(command);
-            const featuresToColor = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.id);
         },
 
         resetCommand() {
@@ -516,6 +517,7 @@ export default {
                     const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                     this.commandManager = new ConfiguratorManager();
                     this.features = featureModelSolo.features;
+                    this.featuresTrimmed = this.features.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract)
                     this.featureModelName = files[0].name.slice(0, files[0].name.length - 4);
                     featureModelSolo.name = this.featureModelName;
                     this.allConstraints = featureModelSolo.constraints.map((e) => ({

@@ -35,7 +35,7 @@ export class FeatureNode {
         } else if (this.feature.open !== null) {
             return dark ? variabilityDarkTheme.colors["should-select-parent"] : variabilityLightTheme.colors["should-select-parent"];
         } else if (this.isAbstract) {
-            return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
+            return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
         }else if (this.feature.selectionState === SelectionState.ExplicitlySelected) {
             return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
         } else if (this.feature.selectionState === SelectionState.ImplicitlyDeselected) {
