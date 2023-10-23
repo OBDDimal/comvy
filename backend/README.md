@@ -3,6 +3,7 @@
 Simple analysis backend built with [Flask](https://flask.palletsprojects.com) and [Flask-Caching](https://flask-caching.readthedocs.io).
 
 ## Routes
+### Registering and Lookup
 
 * `/register_formula`: Register a formula in DIMACS format 
     * Returns `417` when the file is not valid DIMACS
@@ -18,7 +19,11 @@ Simple analysis backend built with [Flask](https://flask.palletsprojects.com) an
     * Returns `404` if `ident` is invalid
     * Returns `200` and raw content of the DIMACS file
 
-* `/analysis/sat/<ident> `: Verify a (partial) configuration as JSON
+### Analysis
+
+> Feature names can be used instead of variable ids by omitting `/raw`, returns will then use feature names as well
+
+* `/analysis/sat/<ident>/raw`: Verify a (partial) configuration as JSON
     * Returns `404` if `ident` is invalid
     * Returns `200` and a JSON
    > Example: `curl -X POST localhost:5000/verify/<ident> -H 'Content-Type: application/json' -d '{"config":[1, 2, 3]}'`
@@ -27,7 +32,7 @@ Simple analysis backend built with [Flask](https://flask.palletsprojects.com) an
    > 
    > `{"valid": False, "refutation": [1,2,3]}`  # if [1,2,3] is an invalid partial configuration
 
-* `/analysis/dp/<ident> `: Compute decision propagation of a (partial) configuration supplied as JSON
+* `/analysis/dp/<ident>/raw`: Compute decision propagation of a (partial) configuration supplied as JSON
     * Returns `404` if `ident` is invalid
     * Returns `200` and a JSON containing sets of free, implicit selected, and implicit deselected variables
 
@@ -35,7 +40,7 @@ Simple analysis backend built with [Flask](https://flask.palletsprojects.com) an
    > 
    > `{"free": [..], "implicit_selected": [..], "implicit_deselected": [..]}`
 
-* `/analysis/deadcore/<ident> `: Compute dead and core variables of the formula
+* `/analysis/deadcore/<ident>/raw`: Compute dead and core variables of the formula
     * Returns `404` if `ident` is invalid
     * Returns `200` and a JSON containing sets of dead and core variables
 
