@@ -11,6 +11,7 @@ from pysat.solvers import Solver
 from tempfile import NamedTemporaryFile
 
 from copy import copy
+import re
 
 from flamapy.metamodels.fm_metamodel.transformations import FeatureIDEReader
 from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat, DimacsWriter
@@ -31,6 +32,56 @@ solvers = dict()
 @app.route('/', methods = ["GET", "POST"])
 def index():
     return Response("Flask Analysis Backend Running", status = 200)
+
+def get_variable_mapping(formula):
+
+    mapping = dict()
+    backmap = dict()
+    p = re.compile(r"c\s+(?P<id>\d+)\s+(?P<name>.+)")
+
+    for comment in formula.comments:
+        comment = comment.strip()
+        if m := p.match(comment):
+            mapping[int(m["id"])] = m["name"]
+            backmap[m["name"]] = int(m["id"])
+        else:
+            raise ValueError(f"malformed comment: \"{comment}\"")
+
+    return mapping, backmap
+
+def ids2names(self, ls):
+
+    mapping = self.mapping
+
+    if type(ls[0]) == list:
+        return [ids2names(l) for l in ls]
+    elif type(ls[0]) == int:
+        return [mapping[abs(i)] for i in ls]
+    else:
+        raise ValueError(f"expected [int] or [[int]] but {ls}")
+
+
+def names2ids(self, ls):
+
+    mapping = self.backmap
+
+    if type(ls[0]) == list:
+        return [names2ids(l) for l in ls]
+    elif type(ls[0]) == str:
+
+        xs = []
+
+        for feat in ls:
+            if feat.startswith("!"):
+                x = -mapping[feat[1:]]
+            else:
+                x = mapping[feat]
+
+            xs.append(x)
+
+        return xs
+    else:
+        raise ValueError(f"expected [str] or [[str]] but {ls}")
 
 
 @app.route('/register_formula', methods = ["POST"])
@@ -58,11 +109,17 @@ def register_file():
         DimacsWriter(persname, model).transform()
 
     ident = path.basename(persname)
+    ident = "abc"
 
     try:
         formula = CNF(from_file = persname)
         solvers[ident] = Solver(bootstrap_with = formula)
 
+        m, b = get_variable_mapping(formula)
+
+        formula.mapping = m
+        formula.backmap = b
+        
         cache.set(f"{ident}", formula)
 
         return Response(ident, status = 200)
@@ -82,26 +139,40 @@ def view_formula(ident):
     return Response(data, status = 200)
 
 
-@app.route('/analysis/sat/<ident>', methods = ["POST"])
-def verify_config(ident):
+@app.route('/analysis/sat/<ident>', defaults = dict(raw = False), methods = ["POST"])
+@app.route('/analysis/sat/<ident>/raw', defaults = dict(raw = True), methods = ["POST"])
+def verify_config(ident, raw = True):
     data = request.get_json()
-
+    
     if (formula := cache.get(ident)) is None:
         print(ident, "unknown")
         return Response(f"key {ident} unknown", status = 404)
+
+    formula.ids2names = ids2names.__get__(formula)
+    formula.names2ids = names2ids.__get__(formula)
 
     config = data.get("config", None)
 
     if config is None or type(config) != list:
         return Response(f"{config} is not a valid configuration ([int] required)")
 
+    if not raw:
+        config = formula.names2ids(config)
+        print(config)
+
     if (solver := solvers.get(ident)) is None:
         solver = Solver(bootstrap_with = formula)
 
     if solver.solve(config):
-        data = dict(valid = True, solution = solver.get_model())
+        if raw:
+            data = dict(valid = True, solution = solver.get_model())
+        else:
+            data = dict(valid = True, solution = formula.ids2names(solver.get_model()))
     else:        
-        data = dict(valid = False, refutation = solver.get_core())
+        if raw:
+            data = dict(valid = False, refutation = solver.get_core())
+        else:
+            data = dict(valid = False, refutation = formula.ids2names(solver.get_core()))
 
     return jsonify(data), 200
 
@@ -112,18 +183,24 @@ def temp_config(config, x):
 
     return config
 
-
-@app.route('/analysis/dp/<ident>', methods = ["POST"])
-def dp(ident):
+@app.route('/analysis/dp/<ident>', defaults = dict(raw = False), methods = ["POST"])
+@app.route('/analysis/dp/<ident>/raw', defaults = dict(raw = True), methods = ["POST"])
+def dp(ident, raw = True):
     data = request.get_json()
     config = data.get("config", None)
-
-    if config is None or type(config) != list:
-        return Response(f"{config} is not a valid configuration ([int] required)")
 
     if (formula := cache.get(ident)) is None:
         print(ident, "unknown")
         return Response(f"key {ident} unknown", status = 404)
+
+    formula.ids2names = ids2names.__get__(formula)
+    formula.names2ids = names2ids.__get__(formula)
+
+    if config is None or type(config) != list:
+        return Response(f"{config} is not a valid configuration ([int] required)")
+
+    if not raw:
+        config = formula.names2ids(config)
 
     if (solver := solvers.get(ident)) is None:
         solver = Solver(bootstrap_with = formula)
@@ -132,26 +209,39 @@ def dp(ident):
     dimp = {x for x in range(1, formula.nv + 1) if not solver.solve(temp_config(config, x))}.difference(config)
 
     free = set(range(1, formula.nv + 1)).difference(simp).difference(dimp)
-    data = dict(implicit_selected = sorted(simp), implicit_deselected = sorted(dimp), free = sorted(free))
+
+    simp = sorted(simp)
+    dimp = sorted(dimp)
+    free = sorted(free)
+
+    if not raw:
+        simp = formula.ids2names(simp)
+        dimp = formula.ids2names(dimp)
+        free = formula.ids2names(free)
+
+    data = dict(implicit_selected = simp, implicit_deselected = dimp, free = free)
 
     return jsonify(data), 200
 
 
-@app.route('/analysis/deadcore/<ident>', methods = ["POST"])
+@app.route('/analysis/deadcore/<ident>', defaults = dict(raw = False), methods = ["POST"])
+@app.route('/analysis/deadcore/<ident>/raw', defaults = dict(raw = True), methods = ["POST"])
 @cache.cached()
-def deadcore(ident):
+def deadcore(ident, raw = True):
     if (formula := cache.get(ident)) is None:
         print(ident, "unknown")
         return Response(f"key {ident} unknown", status = 404)
+
+    formula.ids2names = ids2names.__get__(formula)
+    formula.names2ids = names2ids.__get__(formula)
 
     if (solver := solvers.get(ident)) is None:
         solver = Solver(bootstrap_with = formula)
 
     found = set()
 
-    dead = set()
-    core = set()
-
+    deads = set()
+    cores = set()
     
     for x in range(1, formula.nv + 1):
         x_found = x in found
@@ -166,7 +256,7 @@ def deadcore(ident):
                     found.add(y)
             else:
                 solver.add_clause([-x])
-                dead.add(x)
+                deads.add(x)
 
         if not nx_found:
             if solver.solve([-x]):
@@ -174,11 +264,15 @@ def deadcore(ident):
                     found.add(y)
             else:
                 solver.add_clause([x])
-                core.add(x)
+                cores.add(x)
+
+    if not raw:
+        cores = formula.ids2names(cores)
+        deads = formula.ids2names(deads)
 
     data = {
-        "cores": sorted(core),
-        "deads": sorted(dead)
+        "cores": sorted(cores),
+        "deads": sorted(deads)
     }
 
     return jsonify(data), 200
