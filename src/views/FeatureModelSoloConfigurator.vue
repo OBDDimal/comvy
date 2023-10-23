@@ -7,8 +7,8 @@
             @openFile='openFileDialog'
             @redo='commandManager.redo()'
             @reset='resetCommand'
-            @undo='commandManager.undo()'
             @theme="dark = !dark"
+            @undo='commandManager.undo()'
     ></navbar>
     <v-container :fluid='true'>
         <template v-if="fmIsLoaded">
@@ -173,10 +173,10 @@
 
                                     <!-- Table with all ctcs -->
                                     <v-data-table
+                                            :custom-key-sort="sortByCTCEval"
                                             :footer-props="{'items-per-page-options': [10, 20, 50, 100, 200]}"
-                                            :headers="[{title: 'Valid', value: 'evaluation', key: 'evaluation'}, {title: 'Constraints', key: 'formula', value: 'formula', groupable: false}]"
+                                            :headers="headersCTC"
                                             :items='filteredConstraints'
-                                            :sort-by="[{key: 'evaluation', ord: 'desc'}]"
                                             fixed-header
                                             height='72vh'
                                             show-group-by
@@ -316,6 +316,17 @@ export default {
             {title: 'Selection', key: 'selectionState', width: '10%'},
             {title: 'Name', key: 'name', groupable: false},
         ],
+        headersCTC: [{title: 'Valid', value: 'evaluation', key: 'evaluation'}, {
+            title: 'Constraints',
+            key: 'formula',
+            value: 'formula'
+        }],
+        sortByCTCEval: {
+            evaluation: (a, b) => {
+                console.log(a);
+                console.log(b);
+            }
+        },
         commandManager: new ConfiguratorManager(),
         initialResetCommand: undefined,
         featureModelSolo: FeatureModelSolo,
@@ -579,6 +590,40 @@ export default {
             } else {
                 this.openFile(event.dataTransfer.files);
             }
+        },
+
+        customSortCTCEvaluation(a, b) {
+            console.log(a);
+            if (a.evaluate()) {
+                return 1;
+            } else if (b.evaluate()) {
+                return -1;
+            } else if (!a.evaluate()) {
+                return 1;
+            } else if (!b.evaluate()) {
+                return -1;
+            }
+            return 0;
+        },
+
+        customSortCTC(items, index, isDesc) {
+            console.log(items);
+            items.sort((a, b) => {
+                if (index === "evaluation") {
+                    if (!isDesc) {
+                        return this.customSortCTCEvaluation(a, b);
+                    } else {
+                        return this.customSortCTCEvaluation(b, a);
+                    }
+                } else {
+                    if (!isDesc) {
+                        return a[index] < b[index] ? -1 : 1;
+                    } else {
+                        return b[index] < a[index] ? -1 : 1;
+                    }
+                }
+            });
+            return items;
         }
     },
 
