@@ -65,20 +65,17 @@ export class FeatureModelSolo {
             // To remove #text nodes, as they don't have a tagName
             if (child.tagName) {
                 const featureName = child.getAttribute('name');
-
-                const feature = new
-                Feature(count, featureName);
-                count++;
-                usedFeatures.push(feature);
-                featureDict[featureName] = feature;
                 let toAppend = new FeatureNode(
-                    feature,
                     parent,
                     featureName,
+                    count,
                     child.tagName === 'feature' ? 'and' : child.tagName,
                     child.getAttribute('mandatory') === 'true',
                     child.getAttribute('abstract') === 'true'
                 );
+                count++;
+                usedFeatures.push(toAppend);
+                featureDict[featureName] = toAppend;
                 toAppend.children = FeatureModelSolo.parseChildren(child, toAppend, usedFeatures, count, featureDict);
                 toReturn.push(toAppend);
             }

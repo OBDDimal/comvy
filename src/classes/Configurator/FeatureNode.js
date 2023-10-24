@@ -5,10 +5,9 @@ import {variabilityDarkTheme, variabilityLightTheme} from "@/plugins/vuetify";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
 
 export class FeatureNode {
-    constructor(feature, parent, name, groupType, mandatory, abstract) {
-        this.feature = feature;
-        this.feature.featureNodes.push(this);
+    constructor(parent, name, id, groupType, mandatory, abstract) {
         this.parent = parent;
+        this.id = id;
         this.children = [];
 
         // FM syntax properties
@@ -18,6 +17,7 @@ export class FeatureNode {
         this.isAbstract = abstract;
         this.name = name;
 
+        // Configuration States
         this.selectionState = SelectionState.Unselected;
         this.open = null;
 
@@ -33,19 +33,19 @@ export class FeatureNode {
     }
 
     color(dark = false) {
-        if (this.feature.open) {
+        if (this.open) {
             return dark ? variabilityDarkTheme.colors["should-select"] : variabilityLightTheme.colors["should-select"];
-        } else if (this.feature.open !== null) {
+        } else if (this.open !== null) {
             return dark ? variabilityDarkTheme.colors["should-select-parent"] : variabilityLightTheme.colors["should-select-parent"];
         } else if (this.isAbstract) {
             return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
-        }else if (this.feature.selectionState === SelectionState.ExplicitlySelected) {
+        }else if (this.selectionState === SelectionState.ExplicitlySelected) {
             return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
-        } else if (this.feature.selectionState === SelectionState.ImplicitlyDeselected) {
+        } else if (this.selectionState === SelectionState.ImplicitlyDeselected) {
             return dark ? variabilityDarkTheme.colors["imp-deselected"] : variabilityLightTheme.colors["imp-deselected"];
-        } else if (this.feature.selectionState === SelectionState.ExplicitlyDeselected) {
+        } else if (this.selectionState === SelectionState.ExplicitlyDeselected) {
             return dark ? variabilityDarkTheme.colors.deselected : variabilityLightTheme.colors.deselected;
-        } else if (this.feature.selectionState === SelectionState.ImplicitlySelected) {
+        } else if (this.selectionState === SelectionState.ImplicitlySelected) {
             return dark ? variabilityDarkTheme.colors["imp-selected"] : variabilityLightTheme.colors["imp-selected"];
         } else {
             return dark ? variabilityDarkTheme.colors.primary : variabilityLightTheme.colors.primary;
@@ -368,6 +368,29 @@ export class FeatureNode {
 
     highlightConstraints() {
         this.constraints.forEach((constraint) => constraint.isHighlighted = true);
+    }
+
+    toConfigString(){
+      let configText = '';
+
+      switch (this.selectionState){
+        case SelectionState.ImplicitlySelected:
+          configText = "automatic=\"selected\"";
+          break;
+        case SelectionState.ExplicitlySelected:
+          configText = "manual=\"selected\"";
+          break;
+        case SelectionState.ImplicitlyDeselected:
+          configText = "automatic=\"deselected\"";
+          break;
+        case SelectionState.ExplicitlyDeselected:
+          configText = "manual=\"deselected\"";
+          break;
+        case 'Unselected':
+          break;
+      }
+
+      return `<feature ${configText} name="${this.name}"/>`
     }
 }
 
