@@ -66,7 +66,8 @@ export class FeatureModelSolo {
             if (child.tagName) {
                 const featureName = child.getAttribute('name');
 
-                const feature = new Feature(count, featureName);
+                const feature = new
+                Feature(count, featureName);
                 count++;
                 usedFeatures.push(feature);
                 featureDict[featureName] = feature;

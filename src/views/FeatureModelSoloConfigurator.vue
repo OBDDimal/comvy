@@ -84,15 +84,49 @@
                             <v-tab key='treeView'>Tree View</v-tab>
                         </v-tabs>
                         <!-- Search box for features -->
-                        <v-text-field
-                                v-model='searchFeatures'
-                                :clearable=true
-                                append-inner-icon='mdi-magnify'
-                                class='mr-2 ml-2'
-                                hide-details
-                                label='Search'
-                                single-line
-                        ></v-text-field>
+                        <v-layout row class="align-center justify-center">
+                            <v-menu open-on-hover>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn
+                                            class="mx-1"
+                                            icon="mdi-menu"
+                                            v-bind="props"
+                                    >
+                                    </v-btn>
+                                </template>
+                                <v-list density='compact'>
+                                    <v-list-item title='Show Open Features'>
+                                      <template v-slot:prepend>
+                                        <v-checkbox
+                                            hide-details
+                                            v-model="showOpenFeatures"
+                                            @input="updateFeatures"
+                                            density="compact"
+                                        ></v-checkbox>
+                                      </template>
+                                    </v-list-item>
+                                    <v-list-item title='Show Abstract Features'>
+                                      <template v-slot:prepend>
+                                        <v-checkbox
+                                            hide-details
+                                            v-model="showAbstractFeatures"
+                                            @input="updateFeatures"
+                                            density="compact"
+                                        ></v-checkbox>
+                                      </template>
+                                    </v-list-item>
+                                </v-list>
+                            </v-menu>
+                            <v-text-field
+                                    v-model='searchFeatures'
+                                    :clearable=true
+                                    append-inner-icon='mdi-magnify'
+                                    class='mr-2 ml-2'
+                                    hide-details
+                                    label='Search'
+                                    single-line
+                            ></v-text-field>
+                        </v-layout>
                         <v-window v-model='tabsFirstColumn'>
 
                             <!-- Feature Model Viewer -->
@@ -335,6 +369,8 @@ export default {
         featureModelName: '',
         features: undefined,
         featuresTrimmed: undefined,
+        showOpenFeatures: false,
+        showAbstractFeatures: true,
         filteredConstraints: undefined,
         allConstraints: undefined,
         searchFeatures: '',
@@ -528,7 +564,7 @@ export default {
                     const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                     this.commandManager = new ConfiguratorManager();
                     this.features = featureModelSolo.features;
-                    this.featuresTrimmed = this.features.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract)
+                    this.updateFeatures();
                     this.featureModelName = files[0].name.slice(0, files[0].name.length - 4);
                     featureModelSolo.name = this.featureModelName;
                     this.allConstraints = featureModelSolo.constraints.map((e) => ({
@@ -536,7 +572,6 @@ export default {
                         formula: e.toList(),
                         evaluation: e.evaluate()
                     }));
-
                     this.filteredConstraints = this.allConstraints;
                     this.featureModelSolo = featureModelSolo;
                     this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
@@ -624,7 +659,19 @@ export default {
                 }
             });
             return items;
-        }
+        },
+
+        updateFeatures() {
+            let returnFeatures = this.features;
+            if (!this.showAbstractFeatures) {
+              returnFeatures = returnFeatures.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract);
+            }
+            if (this.showOpenFeatures) {
+              returnFeatures = returnFeatures.filter((f) => f.open != null);
+            }
+            console.log(returnFeatures);
+            this.featuresTrimmed = returnFeatures;
+        },
     },
 
     computed: {
@@ -660,7 +707,7 @@ export default {
             }
 
             return this.featureModelSolo.constraints.some(c => c.evaluate() === false);
-        }
+        },
     }
 };
 </script>

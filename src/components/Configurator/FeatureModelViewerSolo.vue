@@ -84,7 +84,7 @@ export default {
   methods: {
     init() {
       init.initialize(this.d3Data, this.featureModel.root, true)
-      this.resetView(10, 10);
+      this.resetView(3, 7);
     },
     resetView(levels, maxChildren) {
       view.reset(this.d3Data, levels, maxChildren)

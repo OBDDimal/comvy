@@ -18,6 +18,9 @@ export class FeatureNode {
         this.isAbstract = abstract;
         this.name = name;
 
+        this.selectionState = SelectionState.Unselected;
+        this.open = null;
+
         // Cross tree constraint references
         this.constraints = [];
 

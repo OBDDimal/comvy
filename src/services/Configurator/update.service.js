@@ -61,14 +61,14 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
             'mandatory-and-group-circle',
             (d3Node) =>
                 d3Node.parent &&
-                d3Node.parent.data.isAnd() &&
+                (d3Node.parent.data.isAnd() || d3Node.parent.data.children.length === 1) &&
                 d3Node.data.isMandatory
         )
         .classed(
             'optional-and-group-circle',
             (d3Node) =>
                 d3Node.parent &&
-                d3Node.parent.data.isAnd() &&
+                (d3Node.parent.data.isAnd() || d3Node.parent.data.children.length === 1) &&
                 !d3Node.data.isMandatory
         );
 
