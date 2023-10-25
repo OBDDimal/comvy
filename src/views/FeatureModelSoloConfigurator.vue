@@ -560,9 +560,9 @@ export default {
             reader.addEventListener('load', (event) => {
                 try {
                     const features = FeatureModelSolo.loadXmlDataFromConfig(event.target.result);
-
                     const command = new LoadConfigCommand(this.featureModelSolo, this.xml, features);
                     this.commandManager.execute(command);
+                    this.updateFeatures();
                 } catch (e) {
                     appStore.updateSnackbar(
                         'Could not load the configuration file.',
