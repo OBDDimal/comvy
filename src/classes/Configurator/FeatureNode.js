@@ -25,7 +25,7 @@ export class FeatureNode {
         this.constraints = [];
 
         // D3 connection for drawing purposes
-        this.displayName = this.feature.name.slice(0, CONSTANTS.DISPLAY_NAME_LENGTH) + '...';
+        this.displayName = this.name.slice(0, CONSTANTS.DISPLAY_NAME_LENGTH) + '...';
         this.isCollapsed = false;
         this.isHidden = false;
         this.d3Node = null;

@@ -97,7 +97,7 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
             return !d3Data.dark;
         })
         .text((d3Node) =>
-            d3Data.isShortenedName ? d3Node.data.displayName : d3Node.data.feature.name
+            d3Data.isShortenedName ? d3Node.data.displayName : d3Node.data.name
         );
 
     // Remove old/invisible nodes.
@@ -416,7 +416,7 @@ export function calcRectWidth(d3Data, d3Node) {
         return (
             (d3Data.isShortenedName
                 ? d3Node.data.displayName.length
-                : d3Node.data.feature.name.length) *
+                : d3Node.data.name.length) *
             (CONSTANTS.FEATURE_FONT_SIZE *
                 CONSTANTS.MONOSPACE_HEIGHT_WIDTH_FACTOR) +
             CONSTANTS.RECT_MARGIN.left +

@@ -21,7 +21,7 @@ export function reset(d3Data, uncollapsedLevels = 4, maxChildrenCount = 3) {
     }
 }
 
-export function zoomFit(d3Data, padding = 5) {
+export function zoomFit(d3Data, padding = 1) {
     let bounds = document.querySelector('svg > g').getBBox();
     let fullWidth = document.querySelector('svg').getBoundingClientRect().width,
         fullHeight = document.querySelector('svg').getBoundingClientRect().height;

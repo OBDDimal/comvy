@@ -84,7 +84,7 @@
                             <v-tab key='treeView'>Tree View</v-tab>
                         </v-tabs>
                         <!-- Search box for features -->
-                        <v-layout row class="align-center justify-center">
+                        <v-layout class="align-center justify-center" row>
                             <v-menu open-on-hover>
                                 <template v-slot:activator="{ props }">
                                     <v-btn
@@ -96,24 +96,24 @@
                                 </template>
                                 <v-list density='compact'>
                                     <v-list-item title='Show Open Features'>
-                                      <template v-slot:prepend>
-                                        <v-checkbox
-                                            hide-details
-                                            v-model="showOpenFeatures"
-                                            @input="updateFeatures"
-                                            density="compact"
-                                        ></v-checkbox>
-                                      </template>
+                                        <template v-slot:prepend>
+                                            <v-checkbox
+                                                    v-model="showOpenFeatures"
+                                                    density="compact"
+                                                    hide-details
+                                                    @input="updateFeatures"
+                                            ></v-checkbox>
+                                        </template>
                                     </v-list-item>
                                     <v-list-item title='Show Abstract Features'>
-                                      <template v-slot:prepend>
-                                        <v-checkbox
-                                            hide-details
-                                            v-model="showAbstractFeatures"
-                                            @input="updateFeatures"
-                                            density="compact"
-                                        ></v-checkbox>
-                                      </template>
+                                        <template v-slot:prepend>
+                                            <v-checkbox
+                                                    v-model="showAbstractFeatures"
+                                                    density="compact"
+                                                    hide-details
+                                                    @input="updateFeatures"
+                                            ></v-checkbox>
+                                        </template>
                                     </v-list-item>
                                 </v-list>
                             </v-menu>
@@ -151,6 +151,9 @@
                                         <v-tooltip location='bottom'>
                                             <template v-slot:activator='{ props }'>
                                                 <span v-bind='props'>{{ item.selectable.name }}</span>
+                                                <template v-if="item.selectable.isAbstract">
+                                                    <i> Abstract</i>
+                                                </template>
                                             </template>
                                             <span>Var ID: {{ item.selectable.id }}</span>
                                         </v-tooltip>
@@ -214,6 +217,7 @@
                                             fixed-header
                                             height='72vh'
                                             show-group-by
+                                            v-model:sort-by="sortByCTC"
                                     >
 
                                         <!-- Customization of the column FORMULA -->
@@ -357,10 +361,19 @@ export default {
         }],
         sortByCTCEval: {
             evaluation: (a, b) => {
-                console.log(a);
-                console.log(b);
+                if (a) {
+                    return 1;
+                } else if (b) {
+                    return -1;
+                } else if (a !== undefined) {
+                    return 1;
+                } else if (b !== undefined) {
+                    return -1;
+                }
+                return 0;
             }
         },
+        sortByCTC: [{ key: 'evaluation', order: 'desc' }],
         commandManager: new ConfiguratorManager(),
         initialResetCommand: undefined,
         featureModelSolo: FeatureModelSolo,
@@ -401,6 +414,7 @@ export default {
                         this.xml = beautify(rawData.data);
                         this.featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                         this.features = this.featureModelSolo.features;
+                        this.updateFeatures()
                         this.featuresTrimmed = this.features.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract)
                         this.featureModelName = data.data.label;
                         this.featureModelSolo.name = this.featureModelName;
@@ -431,59 +445,6 @@ export default {
 
         downloadXML() {
             this.featureModelSolo.downloadXMLConfig();
-        },
-
-        quickFixCTC(item) {
-            const pc = item.constraint.quickFix(true);
-
-            const command = new QuickFixCTCCommand(this.featureModelSolo, pc);
-            this.commandManager.execute(command);
-        },
-
-        quickFixFeature(feature) {
-            const command = new QuickFixFeatureCommand(this.featureModelSolo, feature);
-            this.commandManager.execute(command);
-        },
-
-        rollbackFixFeature(feature) {
-            const command = new RollbackFixFeatureCommand(this.featureModelSolo, this.commandManager, feature, this.initialResetCommand);
-            this.commandManager.execute(command);
-        },
-
-        rollbackFixVersion(version) {
-            const command = new RollbackFixVersionCommand(this.featureModelSolo, this.commandManager, version, this.initialResetCommand);
-            this.commandManager.execute(command);
-        },
-
-        rollbackFixCTC(item) {
-            const constraint = item.constraint;
-
-            const command = new RollbackFixCTCCommand(this.featureModelSolo, this.commandManager, constraint, this.initialResetCommand);
-            this.commandManager.execute(command);
-        },
-
-        filterFeaturesInVersion(version) {
-            this.versionForFilteringFeatures = version;
-            this.features = version.features;
-        },
-
-        filterFeaturesNotInVersion(version) {
-            this.features = this.featureModelSolo.features.filter(f => !version.features.includes(f));
-        },
-
-        selectVersion(event, row) {
-            let version = row.item.selectable;
-            this.featureModelSolo.loading = true;
-            this.featureModelSolo.loadXmlData(version).then(() => {
-                this.selectedVersion = version;
-                this.allConstraints = this.selectedVersion.constraints.map((e) => ({
-                    constraint: e,
-                    formula: e.toList(),
-                    evaluation: e.evaluate()
-                }));
-                this.filteredConstraints = this.allConstraints;
-                this.featureModelSolo.loading = false;
-            });
         },
 
         redoCommand(event, row) {
@@ -527,6 +488,7 @@ export default {
 
         evaluateCTC(item) {
             const evaluation = item.constraint.evaluate();
+            item.evaluation = evaluation;
             return evaluation ? 'green' : (evaluation === undefined ? '' : 'red');
         },
 
@@ -577,6 +539,7 @@ export default {
                     this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
                     this.initialResetCommand.execute();
                 } catch (e) {
+                    console.log(e)
                     appStore.updateSnackbar(
                         'Could not load the feature model.',
                         'error',
@@ -627,49 +590,14 @@ export default {
             }
         },
 
-        customSortCTCEvaluation(a, b) {
-            console.log(a);
-            if (a.evaluate()) {
-                return 1;
-            } else if (b.evaluate()) {
-                return -1;
-            } else if (!a.evaluate()) {
-                return 1;
-            } else if (!b.evaluate()) {
-                return -1;
-            }
-            return 0;
-        },
-
-        customSortCTC(items, index, isDesc) {
-            console.log(items);
-            items.sort((a, b) => {
-                if (index === "evaluation") {
-                    if (!isDesc) {
-                        return this.customSortCTCEvaluation(a, b);
-                    } else {
-                        return this.customSortCTCEvaluation(b, a);
-                    }
-                } else {
-                    if (!isDesc) {
-                        return a[index] < b[index] ? -1 : 1;
-                    } else {
-                        return b[index] < a[index] ? -1 : 1;
-                    }
-                }
-            });
-            return items;
-        },
-
         updateFeatures() {
             let returnFeatures = this.features;
             if (!this.showAbstractFeatures) {
-              returnFeatures = returnFeatures.filter((f) => !f.featureNodes.find((node) => node.name === f.name).isAbstract);
+                returnFeatures = returnFeatures.filter((f) => !f.isAbstract);
             }
             if (this.showOpenFeatures) {
-              returnFeatures = returnFeatures.filter((f) => f.open != null);
+                returnFeatures = returnFeatures.filter((f) => f.open != null);
             }
-            console.log(returnFeatures);
             this.featuresTrimmed = returnFeatures;
         },
     },
