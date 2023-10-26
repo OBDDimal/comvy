@@ -343,6 +343,7 @@ import beautify from 'xml-beautifier';
 import {LoadConfigCommand} from '@/classes/Commands/SoloConfigurator/LoadConfigCommand';
 import {reColorNode} from '@/services/Configurator/update.service';
 import Navbar from '@/components/Navbar.vue';
+import {decisionPropagation} from "@/classes/BackendAccess/FlaskAccess";
 
 const appStore = useAppStore();
 export default {
@@ -458,13 +459,14 @@ export default {
             this.versionForFilteringFeatures = undefined;
         },
 
-        decisionPropagation(item, selectionState) {
+        async decisionPropagation(item, selectionState) {
             const command = new DecisionPropagationCommand(this.featureModelSolo, this.xml, item, selectionState);
             this.commandManager.execute(command);
         },
 
         resetCommand() {
             this.commandManager.execute(this.initialResetCommand.copy());
+            this.updateFeatures();
         },
 
         countSelectionStateInList(list, selectionState) {
