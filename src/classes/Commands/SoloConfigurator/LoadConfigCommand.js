@@ -2,8 +2,8 @@ import { ConfigurationCommand } from '@/classes/Commands/SoloConfigurator/Config
 import { SelectionState } from '@/classes/Configurator/SelectionState';
 
 export class LoadConfigCommand extends ConfigurationCommand {
-    constructor(featureModel, xml, features) {
-        super(featureModel, xml);
+    constructor(featureModel, features) {
+        super(featureModel);
         this.selection = features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.name);
         this.deselection = features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected).map(f => f.name);
         this.impliedSelection = features.filter(f => f.selectionState === SelectionState.ImplicitlySelected).map(f => f.name);

@@ -31,14 +31,14 @@
                     <v-list-item prepend-icon="mdi-file-document-plus" title='Open Feature Model'
                                  @click='$emit("openFile")'>
                     </v-list-item>
-                    <v-list-item v-if='props.fileIsLoaded' prepend-icon="mdi-file-cog"
+                    <v-list-item v-if='properties.fileIsLoaded' prepend-icon="mdi-file-cog"
                                  title='Load Configuration' @click='$emit("openConf")'
                     >
                     </v-list-item>
-                    <v-list-item v-if='props.fileIsLoaded' prepend-icon="mdi-content-save"
+                    <v-list-item v-if='properties.fileIsLoaded' prepend-icon="mdi-content-save"
                                  title='Save Configuration to Local Storage' @click='$emit("localStorage")'>
                     </v-list-item>
-                    <v-list-item v-if='props.fileIsLoaded' prepend-icon="mdi-download" title='Download Configuration'
+                    <v-list-item v-if='properties.fileIsLoaded' prepend-icon="mdi-download" title='Download Configuration'
                                  @click='$emit("download")'>
                     </v-list-item>
                 </v-list>
@@ -64,6 +64,39 @@
             >
                 Redo
             </v-btn>
+            <v-menu
+                    open-on-hover
+            >
+                <template v-slot:activator="{ props }">
+                    <v-btn
+                            :prepend-icon="properties.serviceIsWorking ? 'mdi-wifi' : 'mdi-wifi-off'"
+                            class="mx-1"
+                            v-bind="props"
+                    >
+                        Service
+                    </v-btn>
+                </template>
+                <v-list density='compact'>
+                    <v-list-item title='Use Flask Backend'>
+                        <template v-slot:prepend>
+                            <v-radio
+                                    v-model="properties.serviceIsFlask"
+                                    density="compact"
+                                    @input='$emit("changeService", false)'
+                            ></v-radio>
+                        </template>
+                    </v-list-item>
+                    <v-list-item title='Use FeatureIDE Service'>
+                        <template v-slot:prepend>
+                            <v-radio
+                                    v-model="properties.serviceIsFeatureIDE"
+                                    density="compact"
+                                    @input='$emit("changeService", true)'
+                            ></v-radio>
+                        </template>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
         </div>
         <v-spacer></v-spacer>
         <div class="hidden-md-and-up">
@@ -114,10 +147,13 @@ const theme = useTheme();
 const drawer = ref(false);
 const fileDrawer = ref(false)
 
-const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo', 'theme'])
+const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo', 'theme', 'changeService'])
 
-const props = defineProps({
+const properties = defineProps({
     fileIsLoaded: Boolean,
+    serviceIsWorking: Boolean,
+    serviceIsFeatureIDE: Boolean,
+    serviceIsFlask: Boolean,
 })
 
 function toggleTheme() {

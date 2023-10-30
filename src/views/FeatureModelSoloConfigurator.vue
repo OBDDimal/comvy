@@ -1,6 +1,9 @@
 <template>
     <navbar
             :file-is-loaded='fmIsLoaded'
+            :service-is-feature-i-d-e='serviceIsFeatureIDE'
+            :service-is-flask='!serviceIsFeatureIDE'
+            :service-is-working='serviceIsWorking'
             @download='downloadXML'
             @localStorage='save'
             @openConf='openConfigFileDialog'
@@ -9,6 +12,7 @@
             @reset='resetCommand'
             @theme="dark = !dark"
             @undo='commandManager.undo()'
+            @change-service="(boolean) => changeService(boolean)"
     ></navbar>
     <v-container :fluid='true'>
         <template v-if="fmIsLoaded">
@@ -210,6 +214,7 @@
 
                                     <!-- Table with all ctcs -->
                                     <v-data-table
+                                            v-model:sort-by="sortByCTC"
                                             :custom-key-sort="sortByCTCEval"
                                             :footer-props="{'items-per-page-options': [10, 20, 50, 100, 200]}"
                                             :headers="headersCTC"
@@ -217,7 +222,6 @@
                                             fixed-header
                                             height='72vh'
                                             show-group-by
-                                            v-model:sort-by="sortByCTC"
                                     >
 
                                         <!-- Customization of the column FORMULA -->
@@ -343,7 +347,8 @@ import beautify from 'xml-beautifier';
 import {LoadConfigCommand} from '@/classes/Commands/SoloConfigurator/LoadConfigCommand';
 import {reColorNode} from '@/services/Configurator/update.service';
 import Navbar from '@/components/Navbar.vue';
-import {decisionPropagation} from "@/classes/BackendAccess/FlaskAccess";
+import {pingFL} from "@/classes/BackendAccess/FlaskAccess";
+import {decisionPropagationFIDE, pingFIDE} from "@/classes/BackendAccess/FeatureIDEAccess";
 
 const appStore = useAppStore();
 export default {
@@ -374,7 +379,7 @@ export default {
                 return 0;
             }
         },
-        sortByCTC: [{ key: 'evaluation', order: 'desc' }],
+        sortByCTC: [{key: 'evaluation', order: 'desc'}],
         commandManager: new ConfiguratorManager(),
         initialResetCommand: undefined,
         featureModelSolo: FeatureModelSolo,
@@ -394,6 +399,8 @@ export default {
         showOpenDialog: false,
         showOpenConfigDialog: false,
         dark: false,
+        serviceIsWorking: false,
+        serviceIsFeatureIDE: false,
         xml: undefined
     }),
 
@@ -405,6 +412,7 @@ export default {
         if (this.id) {
             this.initData();
         }
+        this.setStartService();
     },
 
     methods: {
@@ -460,7 +468,9 @@ export default {
         },
 
         async decisionPropagation(item, selectionState) {
-            const command = new DecisionPropagationCommand(this.featureModelSolo, this.xml, item, selectionState);
+            const data = this.getSelection(item, selectionState);
+            const selectionData = await this.getSelectionDataFromAPI(data);
+            const command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, data.description);
             this.commandManager.execute(command);
         },
 
@@ -519,41 +529,41 @@ export default {
             }
         },
 
-        openFile(files) {
-
-            let reader = new FileReader();
-            reader.addEventListener('load', (event) => {
-                try {
-                    this.xml = event.target.result;
-                    const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
-                    this.commandManager = new ConfiguratorManager();
-                    this.features = featureModelSolo.features;
-                    this.updateFeatures();
-                    this.featureModelName = files[0].name.slice(0, files[0].name.length - 4);
-                    featureModelSolo.name = this.featureModelName;
-                    this.allConstraints = featureModelSolo.constraints.map((e) => ({
-                        constraint: e,
-                        formula: e.toList(),
-                        evaluation: e.evaluate()
-                    }));
-                    this.filteredConstraints = this.allConstraints;
-                    this.featureModelSolo = featureModelSolo;
-                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, this.xml);
-                    this.initialResetCommand.execute();
-                } catch (e) {
-                    console.log(e)
-                    appStore.updateSnackbar(
-                        'Could not load the feature model.',
-                        'error',
-                        5000,
-                        true
-                    );
-                    this.fmIsLoaded = false;
-                } finally {
-                }
-            });
+        async openFile(files) {
             this.fmIsLoaded = true;
-            reader.readAsText(files[0]);
+            const data = await files[0].text();
+            try {
+                this.xml = data;
+                const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
+                this.commandManager = new ConfiguratorManager();
+                this.features = featureModelSolo.features;
+                this.updateFeatures();
+                this.featureModelName = files[0].name.slice(0, files[0].name.length - 4);
+                featureModelSolo.name = this.featureModelName;
+                this.allConstraints = featureModelSolo.constraints.map((e) => ({
+                    constraint: e,
+                    formula: e.toList(),
+                    evaluation: e.evaluate()
+                }));
+                this.filteredConstraints = this.allConstraints;
+                this.featureModelSolo = featureModelSolo;
+                const selectionData = await this.getSelectionDataFromAPI();
+                if (!selectionData) {
+                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
+                    this.initialResetCommand.execute();
+                } else {
+                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
+                    this.initialResetCommand.execute();
+                }
+            } catch (e) {
+                appStore.updateSnackbar(
+                    'Could not load the feature model.',
+                    'error',
+                    5000,
+                    true
+                );
+                this.fmIsLoaded = false;
+            }
             this.showOpenDialog = false;
         },
 
@@ -602,6 +612,175 @@ export default {
             }
             this.featuresTrimmed = returnFeatures;
         },
+
+        async changeService(boolean) {
+            if (boolean) {
+                let isAvailable = await pingFIDE();
+                if (!isAvailable) {
+                    appStore.updateSnackbar(
+                        'Cannot change service because FeatureIDE service is down.',
+                        'error',
+                        5000,
+                        true
+                    );
+                } else {
+                    this.serviceIsFeatureIDE = boolean;
+                    this.serviceIsWorking = true;
+                }
+            } else {
+                let isAvailable = await pingFL();
+                if (!isAvailable) {
+                    appStore.updateSnackbar(
+                        'Cannot change service because Flask service is down.',
+                        'error',
+                        5000,
+                        true
+                    );
+                } else {
+                    this.serviceIsFeatureIDE = boolean;
+                    this.serviceIsWorking = true;
+                }
+            }
+        },
+
+        getSelection(feature, newSelectionState) {
+            feature.selectionState = newSelectionState;
+            let description = "";
+            if (newSelectionState === SelectionState.Unselected) {
+                if (feature.selectionState === SelectionState.ExplicitlySelected) {
+                    description = "Undone selection";
+                } else if (feature.selectionState === SelectionState.ExplicitlyDeselected) {
+                    description = "Undone deselection";
+                }
+            } else {
+                if (newSelectionState === SelectionState.ExplicitlySelected) {
+                    description = "Selected";
+                } else if (newSelectionState === SelectionState.ExplicitlyDeselected) {
+                    description = "Deselected";
+                }
+            }
+            const selection = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.name);
+            const deselection = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected).map(f => f.name);
+
+            return {
+                selection: selection,
+                deselection: deselection,
+                description: description += " " + (feature.name),
+            }
+        },
+
+        async getWorkingService() {
+            let result;
+            if (this.serviceIsFeatureIDE) {
+                result = await pingFL();
+                if (result) {
+                    this.serviceIsFeatureIDE = false;
+                    this.serviceIsWorking = true;
+                }
+            } else {
+                result = await pingFIDE();
+                if (result) {
+                    this.serviceIsFeatureIDE = true;
+                    this.serviceIsWorking = true;
+                }
+            }
+            return result;
+        },
+
+        async getSelectionDataFromAPI(data) {
+
+            let selectionData = undefined;
+            if (!data) {
+                if (this.serviceIsFeatureIDE) {
+                    const apiData = await decisionPropagationFIDE(this.xml);
+                    if (!apiData) {
+                        this.serviceIsWorking = false;
+                        appStore.updateSnackbar(
+                            'Cannot use service because service is down. Retrying...',
+                            'error',
+                            5000,
+                            true
+                        );
+                        if (await this.getWorkingService()) {
+                            return await this.getSelectionDataFromAPI(data);
+                        } else {
+                            console.log("worked")
+                            appStore.updateSnackbar(
+                                'No service is available',
+                                'error',
+                                5000,
+                                true
+                            );
+                            return undefined;
+                        }
+                    }
+                    selectionData = {
+                        eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
+                        iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
+                        eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
+                        iDF: this.featureModelSolo.features.filter(f => apiData.impliedDeselection.includes(f.name)),
+                        uF: this.featureModelSolo.features.filter(f => !(apiData.selection.includes(f.name) || apiData.impliedSelection.includes(f.name) || apiData.deselection.includes(f.name) || apiData.impliedDeselection.includes(f.name))),
+                        oPF: this.featureModelSolo.features.filter(f => apiData.openParents.includes(f.name)),
+                        oCF: this.featureModelSolo.features.filter(f => apiData.openChildren.includes(f.name)),
+                        nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
+                    }
+                } else {
+                    selectionData = "";
+                }
+            } else {
+                if (this.serviceIsFeatureIDE) {
+                    const apiData = await decisionPropagationFIDE(this.xml, data.selection, data.deselection);
+                    if (!apiData) {
+                        this.serviceIsWorking = false;
+                        appStore.updateSnackbar(
+                            'Cannot use service because service is down. Retrying...',
+                            'error',
+                            5000,
+                            true
+                        );
+                        if (await this.getWorkingService()) {
+                            return await this.getSelectionDataFromAPI(data);
+                        } else {
+                            appStore.updateSnackbar(
+                                'No service is available',
+                                'error',
+                                5000,
+                                true
+                            );
+                            return undefined;
+                        }
+                    }
+                    selectionData = {
+                        eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
+                        iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
+                        eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
+                        iDF: this.featureModelSolo.features.filter(f => apiData.impliedDeselection.includes(f.name)),
+                        uF: this.featureModelSolo.features.filter(f => !(apiData.selection.includes(f.name) || apiData.impliedSelection.includes(f.name) || apiData.deselection.includes(f.name) || apiData.impliedDeselection.includes(f.name))),
+                        oPF: this.featureModelSolo.features.filter(f => apiData.openParents.includes(f.name)),
+                        oCF: this.featureModelSolo.features.filter(f => apiData.openChildren.includes(f.name)),
+                        nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
+                    }
+                } else {
+                    selectionData = "";
+                }
+            }
+            return selectionData;
+        },
+
+        async setStartService() {
+            let result = await pingFL();
+            if (result) {
+                this.serviceIsFeatureIDE = false;
+                this.serviceIsWorking = true;
+                return;
+            }
+
+            result = await pingFIDE();
+            if (result) {
+                this.serviceIsFeatureIDE = true;
+                this.serviceIsWorking = true;
+            }
+        }
     },
 
     computed: {

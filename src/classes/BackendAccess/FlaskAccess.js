@@ -3,17 +3,31 @@ import FormData from 'form-data';
 
 let ident = "";
 
-export async function decisionPropagation(xml, selection) {
+export async function decisionPropagationFL(file, selection, deselection) {
     if (ident === "") {
-        const form = new FormData();
-        form.append('file', file);
+        let formData = new FormData();
+        let length = file.target.files.length;
+        let files = file.target.files;
 
-        let data = await axios.post(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}register_formula`, form,
+        for (let x = 0; x < length; x++) {
+            formData.append("files[]", files[x]);
+        }
+
+        console.log(formData);
+
+        let data = await axios.post(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}register_formula`, formData,
             {
-                headers: { 'Content-Type': 'multipart/form-data', },
+                headers: {'Content-Type': 'multipart/form-data',},
             });
         console.log(data)
     }
+}
 
-
+export async function pingFL() {
+    try {
+        await axios.get(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}`);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }

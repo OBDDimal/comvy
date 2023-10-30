@@ -1,58 +1,27 @@
-import { ConfigurationCommand } from '@/classes/Commands/SoloConfigurator/ConfigurationCommand';
+import {ConfigurationCommand} from '@/classes/Commands/SoloConfigurator/ConfigurationCommand';
 import axios from 'axios';
 
 export class ResetCommand extends ConfigurationCommand {
-    constructor(featureModel, xml) {
-        super(featureModel, xml);
+    constructor(featureModel, data) {
+        super(featureModel);
         this.executed = false;
         this.newSatCount = 0;
-
         this.description = "Reset";
-    }
 
-    execute() {
-        if (!this.executed) {
-            this.featureModel.loading = true;
-            const content = new TextEncoder().encode(this.xml);
-            axios.post(`${import.meta.env.VITE_APP_DOMAIN_FEATUREIDESERVICE}propagation`,
-              ({      name: this.featureModel.name+".xml",
-                      selection: [],
-                      deselection: [],
-                      content: Array.from(content)
-              }))
-                .then((d) => {
-                    const data = d.data;
-
-                    this.newSatCount = 0;
-
-                    this.newExplicitlySelectedFeatures = [];
-                    this.newImplicitlySelectedFeatures = this.featureModel.features.filter(f => data.impliedSelection.includes(f.name));
-                    this.newExplicitlyDeselectedFeatures = [];
-                    this.newImplicitlyDeselectedFeatures = this.featureModel.features.filter(f => data.impliedDeselection.includes(f.name));
-                    this.newUnselectedFeatures = this.featureModel.features.filter(f => !(data.impliedDeselection.includes(f.name) || data.impliedSelection.includes(f.name)));
-                    this.newOpenParentFeatures = this.featureModel.features.filter(f => data.openParents.includes(f.name));
-                    this.newOpenChildrenFeatures = this.featureModel.features.filter(f => data.openChildren.includes(f.name));
-                    this.newNotOpenFeatures = this.featureModel.features.filter(f => !data.openChildren.includes(f.name) || !data.openParents.includes(f.name));
-
-                    this.executed = true;
-
-                    this.markAllFeaturesAsPermanantImplicit();
-                    super.execute();
-                    this.featureModel.loading = false;
-                    this.featureModel.loadingOpacity = 0.5;
-                })
-                .catch(() => {
-                    this.featureModel.loading = false;
-                });
-
-        } else {
-            super.execute();
+        if (data) {
+            this.newExplicitlySelectedFeatures = data.eSF;
+            this.newImplicitlySelectedFeatures = data.iSF;
+            this.newExplicitlyDeselectedFeatures = data.eDF;
+            this.newImplicitlyDeselectedFeatures = data.iDF;
+            this.newUnselectedFeatures = data.uF;
+            this.newOpenParentFeatures = data.oPF;
+            this.newOpenChildrenFeatures = data.oCF;
+            this.newNotOpenFeatures = data.nOF;
         }
     }
 
-    markAllFeaturesAsPermanantImplicit() {
-        this.newImplicitlySelectedFeatures.forEach(f => f.fix = true);
-        this.newImplicitlyDeselectedFeatures.forEach(f => f.fix = true);
+    execute() {
+        super.execute();
     }
 
     copy() {
@@ -64,6 +33,9 @@ export class ResetCommand extends ConfigurationCommand {
         command.newExplicitlyDeselectedFeatures = this.newExplicitlyDeselectedFeatures;
         command.newImplicitlyDeselectedFeatures = this.newImplicitlyDeselectedFeatures;
         command.newUnselectedFeatures = this.newUnselectedFeatures;
+        command.newOpenParentFeatures = this.newOpenParentFeatures;
+        command.newOpenChildrenFeatures = this.newOpenChildrenFeatures;
+        command.newNotOpenFeatures = this.newNotOpenFeatures;
 
         command.executed = true;
         return command;

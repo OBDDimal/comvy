@@ -3,10 +3,9 @@ import {SelectionState} from "@/classes/Configurator/SelectionState";
 import {updateSvg} from "@/services/Configurator/update.service";
 
 export class ConfigurationCommand extends Command {
-    constructor(featureModel, xml) {
+    constructor(featureModel) {
         super();
         this.featureModel = featureModel;
-        this.xml = xml;
 
         this.oldExplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected);
         this.oldImplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlySelected);
@@ -16,6 +15,15 @@ export class ConfigurationCommand extends Command {
         this.oldNotOpenFeatures = featureModel.features.filter(f => f.open === null);
         this.oldOpenParentFeatures = featureModel.features.filter(f => f.open === false);
         this.oldOpenChildrenFeatures = featureModel.features.filter(f => f.open === true);
+
+        this.newExplicitlySelectedFeatures = [];
+        this.newImplicitlySelectedFeatures = [];
+        this.newExplicitlyDeselectedFeatures = [];
+        this.newImplicitlyDeselectedFeatures = [];
+        this.newUnselectedFeatures = [];
+        this.newOpenParentFeatures = [];
+        this.newOpenChildrenFeatures = [];
+        this.newNotOpenFeatures = [];
 
         this.oldSatCount = this.featureModel.satCount;
 
