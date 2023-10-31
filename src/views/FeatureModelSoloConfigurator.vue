@@ -79,6 +79,13 @@
                                         </tr>
                                     </table>
                                 </v-tooltip>
+                                <div style="width: 20rem"></div>
+                                <v-checkbox
+                                    hide-details
+                                    v-model="validCheckbox"
+                                    label="Valid"
+                                    density="compact"
+                                ></v-checkbox>
                             </v-layout>
                         </v-card-title>
 
@@ -401,6 +408,7 @@ export default {
         dark: false,
         serviceIsWorking: false,
         serviceIsFeatureIDE: false,
+        validCheckbox: true,
         xml: undefined
     }),
 
@@ -468,9 +476,14 @@ export default {
         },
 
         async decisionPropagation(item, selectionState) {
-            const data = this.getSelection(item, selectionState);
+            const data = this.getSelection();
+            if(selectionState === SelectionState.ExplicitlySelected){
+              data.selection.push(item.name)
+            } else if (selectionState === SelectionState.ExplicitlyDeselected){
+              data.deselection.push(item.name)
+            }
             const selectionData = await this.getSelectionDataFromAPI(data);
-            const command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, data.description);
+            const command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, item, selectionState);
             this.commandManager.execute(command);
         },
 
@@ -548,13 +561,8 @@ export default {
                 this.filteredConstraints = this.allConstraints;
                 this.featureModelSolo = featureModelSolo;
                 const selectionData = await this.getSelectionDataFromAPI();
-                if (!selectionData) {
-                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
-                    this.initialResetCommand.execute();
-                } else {
-                    this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
-                    this.initialResetCommand.execute();
-                }
+                this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
+                this.initialResetCommand.execute();
             } catch (e) {
                 appStore.updateSnackbar(
                     'Could not load the feature model.',
@@ -643,29 +651,14 @@ export default {
             }
         },
 
-        getSelection(feature, newSelectionState) {
-            feature.selectionState = newSelectionState;
-            let description = "";
-            if (newSelectionState === SelectionState.Unselected) {
-                if (feature.selectionState === SelectionState.ExplicitlySelected) {
-                    description = "Undone selection";
-                } else if (feature.selectionState === SelectionState.ExplicitlyDeselected) {
-                    description = "Undone deselection";
-                }
-            } else {
-                if (newSelectionState === SelectionState.ExplicitlySelected) {
-                    description = "Selected";
-                } else if (newSelectionState === SelectionState.ExplicitlyDeselected) {
-                    description = "Deselected";
-                }
-            }
+        getSelection() {
+
             const selection = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected).map(f => f.name);
             const deselection = this.featureModelSolo.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected).map(f => f.name);
 
             return {
                 selection: selection,
                 deselection: deselection,
-                description: description += " " + (feature.name),
             }
         },
 
@@ -691,7 +684,7 @@ export default {
 
             let selectionData = undefined;
             if(!this.serviceIsWorking){
-              if(!(await this.getWorkingService())){
+              if(!(await this.setStartService())){
                 appStore.updateSnackbar(
                     'No service is available.',
                     'error',
