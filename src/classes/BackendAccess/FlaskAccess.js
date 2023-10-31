@@ -3,7 +3,7 @@ import FormData from 'form-data';
 
 let ident = "";
 
-export async function decisionPropagationFL(file, selection, deselection) {
+export async function decisionPropagationFL(file, selection = [], deselection =[]) {
     if (ident === "") {
         let formData = new FormData();
         let length = file.target.files.length;

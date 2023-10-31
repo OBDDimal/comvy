@@ -347,7 +347,7 @@ import beautify from 'xml-beautifier';
 import {LoadConfigCommand} from '@/classes/Commands/SoloConfigurator/LoadConfigCommand';
 import {reColorNode} from '@/services/Configurator/update.service';
 import Navbar from '@/components/Navbar.vue';
-import {pingFL} from "@/classes/BackendAccess/FlaskAccess";
+import {decisionPropagationFL, pingFL} from "@/classes/BackendAccess/FlaskAccess";
 import {decisionPropagationFIDE, pingFIDE} from "@/classes/BackendAccess/FeatureIDEAccess";
 
 const appStore = useAppStore();
@@ -690,6 +690,18 @@ export default {
         async getSelectionDataFromAPI(data) {
 
             let selectionData = undefined;
+            if(!this.serviceIsWorking){
+              if(!(await this.getWorkingService())){
+                appStore.updateSnackbar(
+                    'No service is available.',
+                    'error',
+                    5000,
+                    true
+                );
+                return undefined;
+              }
+            }
+
             if (!data) {
                 if (this.serviceIsFeatureIDE) {
                     const apiData = await decisionPropagationFIDE(this.xml);
@@ -704,9 +716,8 @@ export default {
                         if (await this.getWorkingService()) {
                             return await this.getSelectionDataFromAPI(data);
                         } else {
-                            console.log("worked")
                             appStore.updateSnackbar(
-                                'No service is available',
+                                'No service is available.',
                                 'error',
                                 5000,
                                 true
@@ -725,7 +736,37 @@ export default {
                         nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
                     }
                 } else {
-                    selectionData = "";
+                    const apiData = await decisionPropagationFL(this.xml);
+                    if (!apiData) {
+                        this.serviceIsWorking = false;
+                        appStore.updateSnackbar(
+                            'Cannot use service because service is down. Retrying...',
+                            'error',
+                            5000,
+                            true
+                        );
+                        if (await this.getWorkingService()) {
+                            return await this.getSelectionDataFromAPI(data);
+                        } else {
+                            appStore.updateSnackbar(
+                                'No service is available.',
+                                'error',
+                                5000,
+                                true
+                            );
+                            return undefined;
+                        }
+                    }
+                    selectionData = {
+                        eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
+                        iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
+                        eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
+                        iDF: this.featureModelSolo.features.filter(f => apiData.impliedDeselection.includes(f.name)),
+                        uF: this.featureModelSolo.features.filter(f => !(apiData.selection.includes(f.name) || apiData.impliedSelection.includes(f.name) || apiData.deselection.includes(f.name) || apiData.impliedDeselection.includes(f.name))),
+                        oPF: this.featureModelSolo.features.filter(f => apiData.openParents.includes(f.name)),
+                        oCF: this.featureModelSolo.features.filter(f => apiData.openChildren.includes(f.name)),
+                        nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
+                    }
                 }
             } else {
                 if (this.serviceIsFeatureIDE) {
@@ -742,7 +783,7 @@ export default {
                             return await this.getSelectionDataFromAPI(data);
                         } else {
                             appStore.updateSnackbar(
-                                'No service is available',
+                                'No service is available.',
                                 'error',
                                 5000,
                                 true
@@ -761,7 +802,37 @@ export default {
                         nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
                     }
                 } else {
-                    selectionData = "";
+                    const apiData = await decisionPropagationFL(this.xml, data.selection, data.deselection);
+                    if (!apiData) {
+                        this.serviceIsWorking = false;
+                        appStore.updateSnackbar(
+                            'Cannot use service because service is down. Retrying...',
+                            'error',
+                            5000,
+                            true
+                        );
+                        if (await this.getWorkingService()) {
+                            return await this.getSelectionDataFromAPI(data);
+                        } else {
+                            appStore.updateSnackbar(
+                                'No service is available.',
+                                'error',
+                                5000,
+                                true
+                            );
+                            return undefined;
+                        }
+                    }
+                    selectionData = {
+                        eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
+                        iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
+                        eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
+                        iDF: this.featureModelSolo.features.filter(f => apiData.impliedDeselection.includes(f.name)),
+                        uF: this.featureModelSolo.features.filter(f => !(apiData.selection.includes(f.name) || apiData.impliedSelection.includes(f.name) || apiData.deselection.includes(f.name) || apiData.impliedDeselection.includes(f.name))),
+                        oPF: this.featureModelSolo.features.filter(f => apiData.openParents.includes(f.name)),
+                        oCF: this.featureModelSolo.features.filter(f => apiData.openChildren.includes(f.name)),
+                        nOF: this.featureModelSolo.features.filter(f => !apiData.openChildren.includes(f.name) || !apiData.openParents.includes(f.name))
+                    }
                 }
             }
             return selectionData;
