@@ -483,7 +483,12 @@ export default {
               data.deselection.push(item.name)
             }
             const selectionData = await this.getSelectionDataFromAPI(data);
-            const command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, item, selectionState);
+            let command;
+            if(this.validCheckbox){
+                command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, item, selectionState);
+            } else {
+                command = new DecisionPropagationCommand(this.featureModelSolo, undefined, item, selectionState);
+            }
             this.commandManager.execute(command);
         },
 

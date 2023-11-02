@@ -41,9 +41,9 @@ export class DecisionPropagationCommand extends ConfigurationCommand {
             this.newExplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected);
             this.newImplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlyDeselected);
             this.newUnselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.Unselected);
-            this.newOpenParentFeatures = featureModel.features.filter(f => f.open === null);
-            this.newOpenChildrenFeatures = featureModel.features.filter(f => f.open === false);
-            this.newNotOpenFeatures = featureModel.features.filter(f => f.open === true);
+            this.newOpenParentFeatures = featureModel.features.filter(f => f.open === false);
+            this.newOpenChildrenFeatures = featureModel.features.filter(f => f.open === true);
+            this.newNotOpenFeatures = featureModel.features.filter(f => f.open === null);
         }
 
     }

@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios, {CancelToken} from "axios";
 import FormData from 'form-data';
 
 let ident = "";
 
-export async function decisionPropagationFL(file, selection = [], deselection =[]) {
+export async function decisionPropagationFL(file, selection = [], deselection = []) {
     if (ident === "") {
         let formData = new FormData();
         let length = file.target.files.length;
@@ -15,17 +15,30 @@ export async function decisionPropagationFL(file, selection = [], deselection =[
 
         console.log(formData);
 
+        const source = CancelToken.source();
+        const timeout = setTimeout(() => {
+            source.cancel();
+            // Timeout Logic
+        }, 450);
+
         let data = await axios.post(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}register_formula`, formData,
             {
                 headers: {'Content-Type': 'multipart/form-data',},
+                cancelToken: source.token,
             });
-        console.log(data)
+        clearTimeout(timeout);
     }
 }
 
 export async function pingFL() {
     try {
-        await axios.get(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}`);
+        const source = CancelToken.source();
+        const timeout = setTimeout(() => {
+            source.cancel();
+            // Timeout Logic
+        }, 450);
+        await axios.get(`${import.meta.env.VITE_APP_DOMAIN_FLASKBACKEND}`, {cancelToken: source.token});
+        clearTimeout(timeout);
         return true;
     } catch (e) {
         return false;
