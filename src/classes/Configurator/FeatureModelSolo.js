@@ -93,7 +93,14 @@ export class FeatureModelSolo {
                 const automatic = child.getAttribute('automatic');
                 const manual = child.getAttribute('manual');
 
-                const feature = new Feature(count, featureName);
+                const feature = new FeatureNode(
+                    undefined,
+                    featureName,
+                    count,
+                    undefined,
+                    undefined,
+                    undefined
+                );
                 count++;
                 if(automatic === 'selected') {
                   feature.selectionState = SelectionState.ImplicitlySelected;
