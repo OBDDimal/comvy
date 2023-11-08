@@ -48,6 +48,10 @@ export function initialize(d3Data, data, solo = false) {
         .append('g')
         .classed('highlighted-constraints-container', true);
 
+    d3Data.container.selectedFeatureContainer = svgContent
+        .append('g')
+        .classed('selected-feature-container', true);
+
     d3Data.container.linksContainer = svgContent
         .append('g')
         .classed('link-container', true);

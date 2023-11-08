@@ -4,6 +4,7 @@ import * as collapse from '@/services/FeatureModel/collapse.service.js';
 import {FeatureNode} from '@/classes/Configurator/FeatureNode';
 import {PseudoNode} from '@/classes/PseudoNode';
 import * as count from '@/services/FeatureModel/count.service';
+import {SelectionState} from "@/classes/Configurator/SelectionState";
 
 let d3DataSaved = undefined;
 
@@ -278,10 +279,95 @@ function updateHighlightedConstraints(d3Data, visibleD3Nodes) {
                 CONSTANTS.STROKE_WIDTH_CONSTANT / 2
             })`
         );
-
     // Remove constraints highlighted nodes
     highlightedConstraintNodes.exit().remove();
     highlightedConstraintNodeRects.exit().remove();
+}
+
+function updateSelectionHighlight(d3Data, visibleD3Nodes) {
+    const selectedNodes = visibleD3Nodes
+        .filter((d3Node) => d3Node.data instanceof FeatureNode)
+        .map((d3Node) => ({
+            d3Node: d3Node,
+            selectionState: d3Node.data.selectionState,
+        }))
+        .filter((d) => d.selectionState !== SelectionState.Unselected);
+
+    const selectedFeatureNodes =
+        d3Data.container.selectedFeatureContainer
+            .selectAll('g.selected-nodes')
+            .data(
+                selectedNodes,
+                (d) => d.d3Node.id || (d.d3Node.id = ++d3Data.nodeIdCounter)
+            );
+
+    const selectedFeatureNodesEnter = selectedFeatureNodes
+        .enter()
+        .append('g')
+        .classed('selected-nodes', true);
+
+    const selectedFeatureNodesRects = selectedFeatureNodesEnter
+        .merge(selectedFeatureNodes)
+        .selectAll('rect')
+        .data(
+            (d) =>
+                ({
+                    selectionState: d.selectionState,
+                    d3Node: d.d3Node,
+                }),
+            (d) => d.d3Node.name + d.d3Node.id
+        );
+
+    // Enter highlighted constraint rects
+    const selectedFeatureNodesRectsEnter = selectedFeatureNodesRects
+        .enter()
+        .append('rect')
+        .attr('stroke', CONSTANTS.NODE_CORE_COLOR)
+        .attr('stroke-width', CONSTANTS.STROKE_WIDTH_CONSTANT)
+        .attr('fill', 'transparent');
+
+    console.log(selectedFeatureNodesRectsEnter)
+
+    // Update highlighted constraint rects
+    selectedFeatureNodesRectsEnter
+        .merge(selectedFeatureNodesRects)
+        .attr('x', (json) =>
+            d3Data.direction === 'v' ? -json.d3Node.width / 2 : 0
+        )
+        .attr('y', d3Data.direction === 'v' ? 0 : -CONSTANTS.RECT_HEIGHT / 2)
+        .attr(
+            'height',
+            (_, i) =>
+                CONSTANTS.RECT_HEIGHT +
+                i * 2 * CONSTANTS.STROKE_WIDTH_CONSTANT +
+                CONSTANTS.STROKE_WIDTH_CONSTANT
+        )
+        .attr(
+            'width',
+            (json, i) =>
+                json.d3Node.width +
+                i * 2 * CONSTANTS.STROKE_WIDTH_CONSTANT +
+                CONSTANTS.STROKE_WIDTH_CONSTANT
+        )
+        .attr(
+            'transform',
+            (json, i) => `
+    translate(${
+                json.d3Node.x -
+                i * CONSTANTS.STROKE_WIDTH_CONSTANT -
+                CONSTANTS.STROKE_WIDTH_CONSTANT / 2
+            },
+        ${
+                json.d3Node.y -
+                i * CONSTANTS.STROKE_WIDTH_CONSTANT -
+                CONSTANTS.STROKE_WIDTH_CONSTANT / 2
+            })`
+        );
+    console.log(selectedFeatureNodesRectsEnter)
+
+    // Remove constraints highlighted nodes
+    selectedFeatureNodes.exit().remove();
+    selectedFeatureNodesRects.exit().remove();
 }
 
 function updateLinks(d3Data, visibleD3Nodes) {
@@ -404,6 +490,7 @@ export function updateSvg(d3Data) {
 
     updateColoring(d3Data);
     updateHighlightedConstraints(d3Data, visibleD3Nodes);
+    updateSelectionHighlight(d3Data, visibleD3Nodes);
     updateSegments(d3Data, visibleD3Nodes);
     updateFeatureNodes(d3Data, visibleD3Nodes);
     updatePseudoNodes(d3Data, visibleD3Nodes);
