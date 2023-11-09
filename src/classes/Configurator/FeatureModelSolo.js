@@ -1,14 +1,13 @@
 import beautify from "xml-beautifier";
 import {FeatureNode} from "@/classes/Configurator/FeatureNode";
-import {Feature} from "@/classes/Configurator/Feature";
 import {Constraint} from "@/classes/Constraint";
 import {FeatureNodeConstraintItem} from "@/classes/Constraint/FeatureNodeConstraintItem";
 import {Disjunction} from "@/classes/Constraint/Disjunction";
 import {Conjunction} from "@/classes/Constraint/Conjunction";
 import {Implication} from "@/classes/Constraint/Implication";
 import {Negation} from "@/classes/Constraint/Negation";
-import { Equivalence } from '@/classes/Constraint/Equivalence';
-import { SelectionState } from '@/classes/Configurator/SelectionState';
+import {Equivalence} from '@/classes/Constraint/Equivalence';
+import {SelectionState, SelectionStateValidator} from '@/classes/Configurator/SelectionState';
 
 export class FeatureModelSolo {
     constructor(features, constraints, root, featureDict) {
@@ -102,20 +101,20 @@ export class FeatureModelSolo {
                     undefined
                 );
                 count++;
-                if(automatic === 'selected') {
-                  feature.selectionState = SelectionState.ImplicitlySelected;
+                if (automatic === 'selected') {
+                    feature.selectionState = SelectionState.ImplicitlySelected;
                 }
 
-                if(manual === 'selected') {
-                  feature.selectionState = SelectionState.ExplicitlySelected;
+                if (manual === 'selected') {
+                    feature.selectionState = SelectionState.ExplicitlySelected;
                 }
 
-                if(automatic === 'deselected') {
-                  feature.selectionState = SelectionState.ImplicitlyDeselected;
+                if (automatic === 'deselected') {
+                    feature.selectionState = SelectionState.ImplicitlyDeselected;
                 }
 
-                if(manual === 'deselected') {
-                  feature.selectionState = SelectionState.ExplicitlyDeselected;
+                if (manual === 'deselected') {
+                    feature.selectionState = SelectionState.ExplicitlyDeselected;
                 }
                 usedFeatures.push(feature);
             }
@@ -159,33 +158,33 @@ export class FeatureModelSolo {
         }
     }
 
-    parseToConfig(){
-      let xml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
+    parseToConfig() {
+        let xml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n`;
 
-      xml += '<configuration>\n';
-      this.features.forEach((f) => {
-        xml += f.toConfigString() + "\n"
-      });
-      xml += '</configuration>';
+        xml += '<configuration>\n';
+        this.features.forEach((f) => {
+            xml += f.toConfigString() + "\n"
+        });
+        xml += '</configuration>';
 
-      return xml;
+        return xml;
     }
 
     downloadXMLConfig() {
-      const xml = this.parseToConfig();
+        const xml = this.parseToConfig();
 
-      const filename = `${this.name}_config.xml`;
-      const pom = document.createElement('a');
-      const bb = new Blob([xml], { type: 'application/xml' });
+        const filename = `${this.name}_config.xml`;
+        const pom = document.createElement('a');
+        const bb = new Blob([xml], {type: 'application/xml'});
 
-      pom.setAttribute('href', window.URL.createObjectURL(bb));
-      pom.setAttribute('download', filename);
+        pom.setAttribute('href', window.URL.createObjectURL(bb));
+        pom.setAttribute('download', filename);
 
-      pom.dataset.downloadurl = ['application/xml', pom.download, pom.href].join(
-          ':'
-      );
+        pom.dataset.downloadurl = ['application/xml', pom.download, pom.href].join(
+            ':'
+        );
 
-      pom.click();
+        pom.click();
     }
 
     getAllFeatures(versions) {
@@ -210,4 +209,56 @@ export class FeatureModelSolo {
     calcDecisionPropagation() {
         console.log("DP");
     }
+
+    checkValidity() {
+        if (this.root.selectionState === SelectionState.ImplicitlyDeselected || this.root.selectionState === SelectionState.ExplicitlyDeselected) {
+            return false;
+        } else {
+            if (this.constraints.some(c => c.evaluate() === false)) {
+                return false;
+            }
+
+            if (!this.checkValidityOfFeatures(this.root.selectionState, this.root)) {
+                return false;
+            }
+
+        }
+
+        return true;
+
+    }
+
+    checkValidityOfFeatures(parentSelection, parent) {
+
+        if (parent.isAlt() || parent.isOr()) {
+            if (parent.children.every(ch => ch.selectionState.ExplicitlyDeselected || ch.selectionState.ImplicitlyDeselected)) {
+                return false;
+            }
+        }
+
+        let altCounter = 0;
+
+        for (const child of parent.children) {
+            if (!SelectionStateValidator(parentSelection, child.selectionState)) {
+                return false;
+            }
+            if (parentSelection === SelectionState.Unselected) {
+                parentSelection = child.selectionState;
+            }
+            if (child.selectionState === SelectionState.ImplicitlySelected || child.selectionState === SelectionState.ExplicitlySelected) {
+                altCounter++;
+                if (altCounter > 1 && parent.isAlt()) {
+                    return false;
+                }
+            }
+            if (!child.isLeaf()) {
+                if (!this.checkValidityOfFeatures(parentSelection, child)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
 }

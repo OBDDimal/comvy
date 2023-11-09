@@ -27,6 +27,8 @@ export class DecisionPropagationCommand extends ConfigurationCommand {
         this.description += " " + (feature.name);
 
         if (data) {
+            this.valid = true;
+
             this.newExplicitlySelectedFeatures = data.eSF;
             this.newImplicitlySelectedFeatures = data.iSF;
             this.newExplicitlyDeselectedFeatures = data.eDF;

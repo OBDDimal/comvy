@@ -8,6 +8,8 @@ export class ResetCommand extends ConfigurationCommand {
         this.newSatCount = 0;
         this.description = "Reset";
 
+        this.valid = true;
+
         if (data) {
             this.newExplicitlySelectedFeatures = data.eSF;
             this.newImplicitlySelectedFeatures = data.iSF;

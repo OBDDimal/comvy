@@ -33,12 +33,18 @@ export class FeatureNode {
     }
 
     color(dark = false) {
+        if (this.isAbstract) {
+            return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
+        } else {
+            return dark ? variabilityDarkTheme.colors.primary : variabilityLightTheme.colors.primary;
+        }
+    }
+
+    selectionColor(dark = false) {
         if (this.open) {
             return dark ? variabilityDarkTheme.colors["should-select"] : variabilityLightTheme.colors["should-select"];
         } else if (this.open !== null) {
             return dark ? variabilityDarkTheme.colors["should-select-parent"] : variabilityLightTheme.colors["should-select-parent"];
-        } else if (this.isAbstract) {
-            return dark ? variabilityDarkTheme.colors.secondary : variabilityLightTheme.colors.secondary;
         }else if (this.selectionState === SelectionState.ExplicitlySelected) {
             return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
         } else if (this.selectionState === SelectionState.ImplicitlyDeselected) {
@@ -47,10 +53,10 @@ export class FeatureNode {
             return dark ? variabilityDarkTheme.colors.deselected : variabilityLightTheme.colors.deselected;
         } else if (this.selectionState === SelectionState.ImplicitlySelected) {
             return dark ? variabilityDarkTheme.colors["imp-selected"] : variabilityLightTheme.colors["imp-selected"];
-        } else {
-            return dark ? variabilityDarkTheme.colors.primary : variabilityLightTheme.colors.primary;
         }
+        return undefined;
     }
+
 
     level() {
         if (this.isRoot) {

@@ -72,6 +72,7 @@ export default {
       this.d3Data.flexLayout = undefined;
       this.d3Data.root = undefined;
       this.d3Data.nodeIdCounter = 0;
+      this.d3Data.dark = this.dark;
       this.init();
     },
       dark() {

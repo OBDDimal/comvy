@@ -257,7 +257,7 @@
                                 </v-window-item>
                                 <v-window-item key='conf'>
                                     <v-data-table
-                                            :headers="[{title: 'Description', key: 'description'}, {title: '# Possible configs', key: 'newSatCount'}]"
+                                            :headers="[{title: 'Description', key: 'description'}, {title: '# Possible configs', key: 'newSatCount'}, {title: 'Validation', key: 'valid'}]"
                                             :item-class="command => command.marked ? 'active-command clickable' : 'clickable'"
                                             :items='commandManager.commands'
                                             class='elevation-1'
@@ -569,6 +569,7 @@ export default {
                 this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
                 this.initialResetCommand.execute();
             } catch (e) {
+                console.log(e);
                 appStore.updateSnackbar(
                     'Could not load the feature model.',
                     'error',

@@ -5,6 +5,7 @@ import {FeatureNode} from '@/classes/Configurator/FeatureNode';
 import {PseudoNode} from '@/classes/PseudoNode';
 import * as count from '@/services/FeatureModel/count.service';
 import {SelectionState} from "@/classes/Configurator/SelectionState";
+import {de} from "vuetify/locale";
 
 let d3DataSaved = undefined;
 
@@ -285,13 +286,14 @@ function updateHighlightedConstraints(d3Data, visibleD3Nodes) {
 }
 
 function updateSelectionHighlight(d3Data, visibleD3Nodes) {
+
     const selectedNodes = visibleD3Nodes
         .filter((d3Node) => d3Node.data instanceof FeatureNode)
         .map((d3Node) => ({
             d3Node: d3Node,
-            selectionState: d3Node.data.selectionState,
+            feature: d3Node.data,
         }))
-        .filter((d) => d.selectionState !== SelectionState.Unselected);
+        .filter((d) => d.feature.selectionState !== SelectionState.Unselected);
 
     const selectedFeatureNodes =
         d3Data.container.selectedFeatureContainer
@@ -309,12 +311,11 @@ function updateSelectionHighlight(d3Data, visibleD3Nodes) {
     const selectedFeatureNodesRects = selectedFeatureNodesEnter
         .merge(selectedFeatureNodes)
         .selectAll('rect')
-        .data(
-            (d) =>
-                ({
-                    selectionState: d.selectionState,
+        .data((d) =>
+            selectedNodes.filter((d3) => d3.d3Node.id === d.d3Node.id).map((d3) => ({
+                    feature: d3.feature,
                     d3Node: d.d3Node,
-                }),
+                })),
             (d) => d.d3Node.name + d.d3Node.id
         );
 
@@ -322,15 +323,13 @@ function updateSelectionHighlight(d3Data, visibleD3Nodes) {
     const selectedFeatureNodesRectsEnter = selectedFeatureNodesRects
         .enter()
         .append('rect')
-        .attr('stroke', CONSTANTS.NODE_CORE_COLOR)
         .attr('stroke-width', CONSTANTS.STROKE_WIDTH_CONSTANT)
         .attr('fill', 'transparent');
-
-    console.log(selectedFeatureNodesRectsEnter)
 
     // Update highlighted constraint rects
     selectedFeatureNodesRectsEnter
         .merge(selectedFeatureNodesRects)
+        .attr('stroke', (json) => json.feature.selectionColor(d3Data.dark))
         .attr('x', (json) =>
             d3Data.direction === 'v' ? -json.d3Node.width / 2 : 0
         )
@@ -363,11 +362,10 @@ function updateSelectionHighlight(d3Data, visibleD3Nodes) {
                 CONSTANTS.STROKE_WIDTH_CONSTANT / 2
             })`
         );
-    console.log(selectedFeatureNodesRectsEnter)
 
     // Remove constraints highlighted nodes
-    selectedFeatureNodes.exit().remove();
     selectedFeatureNodesRects.exit().remove();
+    selectedFeatureNodes.exit().remove();
 }
 
 function updateLinks(d3Data, visibleD3Nodes) {
@@ -489,12 +487,13 @@ export function updateSvg(d3Data) {
     }
 
     updateColoring(d3Data);
-    updateHighlightedConstraints(d3Data, visibleD3Nodes);
     updateSelectionHighlight(d3Data, visibleD3Nodes);
+    updateHighlightedConstraints(d3Data, visibleD3Nodes);
     updateSegments(d3Data, visibleD3Nodes);
     updateFeatureNodes(d3Data, visibleD3Nodes);
     updatePseudoNodes(d3Data, visibleD3Nodes);
     updateLinks(d3Data, visibleD3Nodes);
+
 }
 
 // Calculates rect-width dependent on font-size dynamically.

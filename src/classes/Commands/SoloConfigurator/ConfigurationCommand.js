@@ -6,6 +6,7 @@ export class ConfigurationCommand extends Command {
     constructor(featureModel) {
         super();
         this.featureModel = featureModel;
+        this.valid = false;
 
         this.oldExplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected);
         this.oldImplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlySelected);
@@ -31,6 +32,7 @@ export class ConfigurationCommand extends Command {
     }
 
     execute() {
+
         this.newExplicitlySelectedFeatures.forEach(f => f.selectionState = SelectionState.ExplicitlySelected);
         this.newImplicitlySelectedFeatures.forEach(f => f.selectionState = SelectionState.ImplicitlySelected);
         this.newExplicitlyDeselectedFeatures.forEach(f => f.selectionState = SelectionState.ExplicitlyDeselected);
@@ -39,6 +41,11 @@ export class ConfigurationCommand extends Command {
         this.newNotOpenFeatures.forEach(f => f.open = null)
         this.newOpenParentFeatures.forEach(f => f.open = false);
         this.newOpenChildrenFeatures.forEach(f => f.open = true);
+
+        if(!this.valid) {
+            this.valid = this.featureModel.checkValidity();
+            console.log(this.valid);
+        }
 
         this.featureModel.satCount = this.newSatCount;
         updateSvg();
