@@ -765,6 +765,7 @@ export default {
                         }
                     }
                     selectionData = {
+                        valid: apiData.valid,
                         eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
                         iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
                         eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
@@ -797,6 +798,7 @@ export default {
                         }
                     }
                     selectionData = {
+                        valid: apiData.valid,
                         eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
                         iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
                         eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
@@ -831,6 +833,7 @@ export default {
                         }
                     }
                     selectionData = {
+                        valid: apiData.valid,
                         eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
                         iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
                         eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
@@ -863,6 +866,7 @@ export default {
                         }
                     }
                     selectionData = {
+                        valid: apiData.valid,
                         eSF: this.featureModelSolo.features.filter(f => apiData.selection.includes(f.name)),
                         iSF: this.featureModelSolo.features.filter(f => apiData.impliedSelection.includes(f.name)),
                         eDF: this.featureModelSolo.features.filter(f => apiData.deselection.includes(f.name)),
