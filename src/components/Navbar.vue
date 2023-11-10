@@ -53,14 +53,16 @@
             <v-btn
                     class="mx-1"
                     prepend-icon="mdi-undo"
-                    @click='$emit("undo")'
+                    :disabled="!properties.commandManager.isUndoAvailable()"
+                    @click='properties.commandManager.undo()'
             >
                 Undo
             </v-btn>
             <v-btn
                     class="mx-1"
                     prepend-icon="mdi-redo"
-                    @click='$emit("redo")'
+                    :disabled="!properties.commandManager.isRedoAvailable()"
+                    @click='properties.commandManager.redo()'
             >
                 Redo
             </v-btn>
@@ -147,13 +149,14 @@ const theme = useTheme();
 const drawer = ref(false);
 const fileDrawer = ref(false)
 
-const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'undo', 'redo', 'theme', 'changeService'])
+const emit = defineEmits(['localStorage', 'download', 'openFile', 'openConf', 'reset', 'theme', 'changeService'])
 
 const properties = defineProps({
     fileIsLoaded: Boolean,
     serviceIsWorking: Boolean,
     serviceIsFeatureIDE: Boolean,
     serviceIsFlask: Boolean,
+    commandManager: undefined,
 })
 
 function toggleTheme() {

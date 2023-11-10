@@ -27,13 +27,10 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
         // Open contextmenu with right-click on d3Node.
         .on('contextmenu', (event, d3Node) => {
             event.preventDefault();
-            d3Data.contextMenu.selectedD3Node = d3Node;
-            d3Data.contextMenu.event = event;
+            d3Data.selectedD3Node = d3Node.data;
         })
         // Toggle collapsing on double-clock on feature-node.
         .on('click', (event, d3Node) => {
-            d3Data.contextMenu.selectedD3Node = d3Node;
-            d3Data.contextMenu.event = event;
             dblClickEvent(event, d3Data, d3Node);
             collapse.collapseShortcut(d3Data, event, d3Node); // Collapse d3Node with Ctrl + left-click on d3Node.
         });

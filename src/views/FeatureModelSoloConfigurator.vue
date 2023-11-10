@@ -4,14 +4,13 @@
             :service-is-feature-i-d-e='serviceIsFeatureIDE'
             :service-is-flask='!serviceIsFeatureIDE'
             :service-is-working='serviceIsWorking'
+            :command-manager="commandManager"
             @download='downloadXML'
             @localStorage='save'
             @openConf='openConfigFileDialog'
             @openFile='openFileDialog'
-            @redo='commandManager.redo()'
             @reset='resetCommand'
             @theme="dark = !dark"
-            @undo='commandManager.undo()'
             @change-service="(boolean) => changeService(boolean)"
     ></navbar>
     <v-container :fluid='true'>
@@ -81,10 +80,10 @@
                                 </v-tooltip>
                                 <div style="width: 20rem"></div>
                                 <v-checkbox
-                                    hide-details
-                                    v-model="validCheckbox"
-                                    label="Valid"
-                                    density="compact"
+                                        v-model="validCheckbox"
+                                        density="compact"
+                                        hide-details
+                                        label="Valid"
                                 ></v-checkbox>
                             </v-layout>
                         </v-card-title>
@@ -206,7 +205,9 @@
                                 <v-window-item key='featureModelViewer'>
                                     <feature-model-viewer-solo ref="featureModelViewerSolo"
                                                                :dark='dark'
-                                                               :feature-model='featureModelSolo'></feature-model-viewer-solo>
+                                                               :feature-model='featureModelSolo'
+                                                               @select='(name) => searchFeatures = name'
+                                    ></feature-model-viewer-solo>
                                 </v-window-item>
 
                                 <!-- Cross-Tree Constraint Viewer -->
@@ -270,6 +271,10 @@
                                             single-select
                                             @click:row='redoCommand'
                                     >
+
+                                        <template v-slot:item.valid="{ item }">
+                                            {{ item.selectable.valid ? 'true' : 'false' }}
+                                        </template>
                                     </v-data-table>
                                 </v-window-item>
                             </v-window>
@@ -297,7 +302,8 @@
                         <p class="text-h4">
                             Drop your FeatureModel file here, or click to select it.
                         </p>
-                        <v-btn class="mt-6 text-h4 " color="primary" rounded="xl" variant="text" @click.stop="">
+                        <v-btn class="mt-6 text-h4 " color="primary" rounded="xl" variant="text"
+                               @click.stop="openFromLocalStorage">
                             Or click here to load it from your local storage.
                         </v-btn>
                     </v-row>
@@ -477,18 +483,19 @@ export default {
 
         async decisionPropagation(item, selectionState) {
             const data = this.getSelection();
-            if(selectionState === SelectionState.ExplicitlySelected){
-              data.selection.push(item.name)
-            } else if (selectionState === SelectionState.ExplicitlyDeselected){
-              data.deselection.push(item.name)
+            if (selectionState === SelectionState.ExplicitlySelected) {
+                data.selection.push(item.name)
+            } else if (selectionState === SelectionState.ExplicitlyDeselected) {
+                data.deselection.push(item.name)
+            } else if (selectionState === SelectionState.Unselected) {
+                if (item.selectionState === SelectionState.ExplicitlySelected) {
+                    data.selection.pop(item.name)
+                } else if (item.selectionState === SelectionState.ExplicitlyDeselected) {
+                    data.deselection.pop(item.name)
+                }
             }
             const selectionData = await this.getSelectionDataFromAPI(data);
-            let command;
-            if(this.validCheckbox){
-                command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, item, selectionState);
-            } else {
-                command = new DecisionPropagationCommand(this.featureModelSolo, undefined, item, selectionState);
-            }
+            let command = new DecisionPropagationCommand(this.featureModelSolo, selectionData, item, selectionState, this.validCheckbox);
             this.commandManager.execute(command);
         },
 
@@ -547,6 +554,39 @@ export default {
             }
         },
 
+        async openFromLocalStorage() {
+            this.fmIsLoaded = true;
+            const data = localStorage.featureModelData;
+            try {
+                this.xml = data;
+                const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
+                this.commandManager = new ConfiguratorManager();
+                this.features = featureModelSolo.features;
+                this.updateFeatures();
+                this.featureModelName = "LocalStorageFile";
+                featureModelSolo.name = this.featureModelName;
+                this.allConstraints = featureModelSolo.constraints.map((e) => ({
+                    constraint: e,
+                    formula: e.toList(),
+                    evaluation: e.evaluate()
+                }));
+                this.filteredConstraints = this.allConstraints;
+                this.featureModelSolo = featureModelSolo;
+                const selectionData = await this.getSelectionDataFromAPI();
+                this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
+                this.initialResetCommand.execute();
+            } catch (e) {
+                console.log(e);
+                appStore.updateSnackbar(
+                    'Could not load the feature model.',
+                    'error',
+                    5000,
+                    true
+                );
+                this.fmIsLoaded = false;
+            }
+        },
+
         async openFile(files) {
             this.fmIsLoaded = true;
             const data = await files[0].text();
@@ -569,7 +609,6 @@ export default {
                 this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
                 this.initialResetCommand.execute();
             } catch (e) {
-                console.log(e);
                 appStore.updateSnackbar(
                     'Could not load the feature model.',
                     'error',
@@ -690,16 +729,16 @@ export default {
         async getSelectionDataFromAPI(data) {
 
             let selectionData = undefined;
-            if(!this.serviceIsWorking){
-              if(!(await this.setStartService())){
-                appStore.updateSnackbar(
-                    'No service is available.',
-                    'error',
-                    5000,
-                    true
-                );
-                return undefined;
-              }
+            if (!this.serviceIsWorking) {
+                if (!(await this.setStartService())) {
+                    appStore.updateSnackbar(
+                        'No service is available.',
+                        'error',
+                        5000,
+                        true
+                    );
+                    return undefined;
+                }
             }
 
             if (!data) {

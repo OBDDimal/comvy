@@ -44,7 +44,6 @@ export class ConfigurationCommand extends Command {
 
         if(!this.valid) {
             this.valid = this.featureModel.checkValidity();
-            console.log(this.valid);
         }
 
         this.featureModel.satCount = this.newSatCount;

@@ -4,13 +4,12 @@ import axios from 'axios';
 import {de} from "vuetify/locale";
 
 export class DecisionPropagationCommand extends ConfigurationCommand {
-    constructor(featureModel, data, feature, newSelectionState) {
+    constructor(featureModel, data, feature, newSelectionState, validCheckbox) {
         super(featureModel);
         this.executed = false;
         this.newSatCount = 0;
         this.description = "";
 
-        feature.selectionState = newSelectionState;
         if (newSelectionState === SelectionState.Unselected) {
             if (feature.selectionState === SelectionState.ExplicitlySelected) {
                 this.description = "Undone selection";
@@ -24,11 +23,11 @@ export class DecisionPropagationCommand extends ConfigurationCommand {
                 this.description = "Deselected";
             }
         }
+        feature.selectionState = newSelectionState;
         this.description += " " + (feature.name);
 
-        if (data) {
+        if (data && validCheckbox) {
             this.valid = true;
-
             this.newExplicitlySelectedFeatures = data.eSF;
             this.newImplicitlySelectedFeatures = data.iSF;
             this.newExplicitlyDeselectedFeatures = data.eDF;
@@ -37,7 +36,18 @@ export class DecisionPropagationCommand extends ConfigurationCommand {
             this.newOpenParentFeatures = data.oPF;
             this.newOpenChildrenFeatures = data.oCF;
             this.newNotOpenFeatures = data.nOF;
+        } else if (data) {
+            this.valid = data.valid;
+            this.newExplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected);
+            this.newImplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlySelected);
+            this.newExplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected);
+            this.newImplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlyDeselected);
+            this.newUnselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.Unselected);
+            this.newOpenParentFeatures = featureModel.features.filter(f => f.open === false);
+            this.newOpenChildrenFeatures = featureModel.features.filter(f => f.open === true);
+            this.newNotOpenFeatures = featureModel.features.filter(f => f.open === null);
         } else {
+            this.valid = featureModel.checkValidity();
             this.newExplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlySelected);
             this.newImplicitlySelectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ImplicitlySelected);
             this.newExplicitlyDeselectedFeatures = featureModel.features.filter(f => f.selectionState === SelectionState.ExplicitlyDeselected);

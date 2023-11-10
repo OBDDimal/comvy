@@ -230,20 +230,23 @@ export class FeatureModelSolo {
 
     checkValidityOfFeatures(parentSelection, parent) {
 
-        if (parent.isAlt() || parent.isOr()) {
-            if (parent.children.every(ch => ch.selectionState.ExplicitlyDeselected || ch.selectionState.ImplicitlyDeselected)) {
+        if (parent.isAlt() || parent.isOr() && (parentSelection === SelectionState.ExplicitlySelected || parentSelection === SelectionState.ImplicitlySelected)) {
+            if (parent.children.every(ch => ch.selectionState === SelectionState.ExplicitlyDeselected || ch.selectionState === SelectionState.ImplicitlyDeselected)) {
                 return false;
             }
         }
 
         let altCounter = 0;
+        let childSelection;
 
         for (const child of parent.children) {
             if (!SelectionStateValidator(parentSelection, child.selectionState)) {
                 return false;
             }
-            if (parentSelection === SelectionState.Unselected) {
-                parentSelection = child.selectionState;
+            if (parentSelection === SelectionState.ExplicitlyDeselected || parentSelection === SelectionState.ImplicitlyDeselected) {
+                childSelection = parentSelection;
+            } else {
+                childSelection = child.selectionState;
             }
             if (child.selectionState === SelectionState.ImplicitlySelected || child.selectionState === SelectionState.ExplicitlySelected) {
                 altCounter++;
@@ -252,7 +255,7 @@ export class FeatureModelSolo {
                 }
             }
             if (!child.isLeaf()) {
-                if (!this.checkValidityOfFeatures(parentSelection, child)) {
+                if (!this.checkValidityOfFeatures(childSelection, child)) {
                     return false;
                 }
             }
