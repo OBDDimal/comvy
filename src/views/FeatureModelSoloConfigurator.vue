@@ -609,6 +609,7 @@ export default {
                 this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
                 this.initialResetCommand.execute();
             } catch (e) {
+                console.log(e)
                 appStore.updateSnackbar(
                     'Could not load the feature model.',
                     'error',
@@ -730,7 +731,8 @@ export default {
 
             let selectionData = undefined;
             if (!this.serviceIsWorking) {
-                if (!(await this.setStartService())) {
+              let serviceStatus = await this.setStartService();
+                if (!serviceStatus) {
                     appStore.updateSnackbar(
                         'No service is available.',
                         'error',
@@ -894,6 +896,7 @@ export default {
                 this.serviceIsFeatureIDE = true;
                 this.serviceIsWorking = true;
             }
+            return result;
         }
     },
 
