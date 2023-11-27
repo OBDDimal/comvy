@@ -1,13 +1,14 @@
 <template>
     <navbar
+            :command-manager="commandManager"
             :file-is-loaded='fmIsLoaded'
             :service-is-feature-i-d-e='serviceIsFeatureIDE'
             :service-is-flask='!serviceIsFeatureIDE'
             :service-is-working='serviceIsWorking'
-            :command-manager="commandManager"
             @download='downloadXML'
             @localStorage='save'
             @openConf='openConfigFileDialog'
+            @openEdit='redirectToEditor'
             @openFile='openFileDialog'
             @reset='resetCommand'
             @theme="dark = !dark"
@@ -20,7 +21,7 @@
             <v-row>
                 <v-col cols='4'>
                     <v-card height='89.5vh'>
-                        <v-card-title>
+                        <v-card-title style="word-break: normal">
                             <v-layout class='align-center' row>
                                 <!-- Heading features -->
                                 <div class='mr-2'>
@@ -78,9 +79,9 @@
                                         </tr>
                                     </table>
                                 </v-tooltip>
-                                <div style="width: 20rem"></div>
                                 <v-checkbox
                                         v-model="validCheckbox"
+                                        class="justify-end d-md-flex hidden-md-and-down"
                                         density="compact"
                                         hide-details
                                         label="Valid"
@@ -88,11 +89,6 @@
                             </v-layout>
                         </v-card-title>
 
-                        <!-- Tabs to select (Feature Model Viewer, List Tree, Cross-Tree Constraints -->
-                        <v-tabs v-model='tabsFirstColumn'>
-                            <v-tab key='dataTable'>Data Table</v-tab>
-                            <v-tab key='treeView'>Tree View</v-tab>
-                        </v-tabs>
                         <!-- Search box for features -->
                         <v-layout class="align-center justify-center" row>
                             <v-menu open-on-hover>
@@ -137,50 +133,47 @@
                                     single-line
                             ></v-text-field>
                         </v-layout>
-                        <v-window v-model='tabsFirstColumn'>
-
-                            <!-- Feature Model Viewer -->
-                            <v-window-item key='dataTable'>
 
 
-                                <!-- Table with all features that are currently fitlered and searched -->
-                                <v-data-table
-                                        :headers='headersFeatures'
-                                        :items='featuresTrimmed'
-                                        :search='searchFeatures'
-                                        disable-pagination
-                                        fixed-header
-                                        height='67.75vh'
-                                        hide-default-footer
-                                        item-key='name'
-                                        show-group-by
-                                        single-select
-                                >
-                                    <!-- Customization of the column NAME -->
-                                    <template v-slot:item.name='{ item }'>
-                                        <v-tooltip location='bottom'>
-                                            <template v-slot:activator='{ props }'>
-                                                <span v-bind='props'>{{ item.selectable.name }}</span>
-                                                <template v-if="item.selectable.isAbstract">
-                                                    <i> Abstract</i>
-                                                </template>
-                                            </template>
-                                            <span>Var ID: {{ item.selectable.id }}</span>
-                                        </v-tooltip>
+                        <!-- Table with all features that are currently fitlered and searched -->
+                        <v-data-table
+                                :headers='headersFeatures'
+                                :items='featuresTrimmed'
+                                :search='searchFeatures'
+                                disable-pagination
+                                fixed-header
+                                height='72vh'
+                                hide-default-footer
+                                item-key='name'
+                                items-per-page="25"
+                                show-group-by
+                                single-select
+                        >
+
+                            <!-- Customization of the column NAME -->
+                            <template v-slot:item.name='{ item }'>
+                                <v-tooltip location='bottom'>
+                                    <template v-slot:activator='{ props }'>
+
+                                        <template v-if="item.selectable.isAbstract">
+
+                                            <span v-bind='props'> <i>{{ item.selectable.name }} Abstract </i></span>
+                                        </template>
+                                        <template v-else>
+                                            <span v-bind='props'> {{ item.selectable.name }} </span>
+                                        </template>
                                     </template>
+                                    <span>Var ID: {{ item.selectable.id }}</span>
+                                </v-tooltip>
+                            </template>
 
-                                    <!-- Customization of the column SELECTIONSTATE -->
-                                    <template v-slot:item.selectionState='{ item }'>
-                                        <DoubleCheckbox v-bind:selection-item='item.selectable'
-                                                        @select='(selection) => decisionPropagation(item.selectable, selection)'></DoubleCheckbox>
-                                    </template>
+                            <!-- Customization of the column SELECTIONSTATE -->
+                            <template v-slot:item.selectionState='{ item }'>
+                                <DoubleCheckbox class="overflow-hidden" v-bind:selection-item='item.selectable'
+                                                @select='(selection) => decisionPropagation(item.selectable, selection)'></DoubleCheckbox>
+                            </template>
 
-                                </v-data-table>
-                            </v-window-item>
-                            <v-window-item key='treeView'>
-                                Not Implemented yet. Waiting for V-TreeView Component
-                            </v-window-item>
-                        </v-window>
+                        </v-data-table>
 
                     </v-card>
                 </v-col>
@@ -429,6 +422,16 @@ export default {
         this.setStartService();
     },
 
+    watch: {
+        searchFeatures(newValue) {
+            if (newValue !== "") {
+                this.showOpenFeatures = false;
+                this.showAbstractFeatures = true;
+            }
+            this.updateFeatures()
+        },
+    },
+
     methods: {
         initData() {
             api.get(`${import.meta.env.VITE_APP_DOMAIN}files/${this.id}/`).then(
@@ -464,6 +467,11 @@ export default {
                 5000,
                 true
             );
+        },
+
+        redirectToEditor() {
+            localStorage.featureModelData = this.xml;
+            window.location = "https://variability.dev/editor/model"
         },
 
         downloadXML() {
@@ -731,7 +739,7 @@ export default {
 
             let selectionData = undefined;
             if (!this.serviceIsWorking) {
-              let serviceStatus = await this.setStartService();
+                let serviceStatus = await this.setStartService();
                 if (!serviceStatus) {
                     appStore.updateSnackbar(
                         'No service is available.',
