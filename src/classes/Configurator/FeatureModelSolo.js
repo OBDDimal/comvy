@@ -94,7 +94,7 @@ export class FeatureModelSolo {
 
                 const feature = new FeatureNode(
                     undefined,
-                    featureName,
+                    featureName.trim(),
                     count,
                     undefined,
                     undefined,

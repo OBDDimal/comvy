@@ -69,15 +69,313 @@ export const operators = {
 
 export const EXAMPLE_FEATURE_MODEL_XML = `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<featureModel>
-    <properties/>
-        <struct>
-            <and name="Root" mandatory="true">
-                <feature mandatory="true" name="Feature A"/>
-                <feature mandatory="false" name="Feature B"/>
-            </and>
-        </struct>
-    <constraints/>
-    <comments/>
-</featureModel>
+\t<featureModel>
+\t\t<properties/>
+\t\t<struct>
+\t\t\t<alt abstract="true" mandatory="true" name="BerkeleyDb">
+\t\t\t\t<and abstract="true" name="BerkeleyDB">
+\t\t\t\t\t<alt abstract="true" name="FLogging">
+\t\t\t\t\t\t<and abstract="true" name="Logging">
+\t\t\t\t\t\t\t<feature name="featureLoggingFile"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingConsole"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingDbLog"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingFinest"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingFiner"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingFine"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingInfo"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingConfig"/>
+\t\t\t\t\t\t\t<feature name="featureLoggingSevere"/>
+\t\t\t\t\t\t\t<feature mandatory="true" name="featureLoggingBase"/>
+\t\t\t\t\t\t</and>
+\t\t\t\t\t</alt>
+\t\t\t\t\t<alt abstract="true" mandatory="true" name="FPersistency">
+\t\t\t\t\t\t<and abstract="true" name="Persistency">
+\t\t\t\t\t\t\t<or abstract="true" name="FPersistencyFeatures">
+\t\t\t\t\t\t\t\t<feature name="featureChecksum"/>
+\t\t\t\t\t\t\t\t<feature name="featureFileHandleCache"/>
+\t\t\t\t\t\t\t\t<feature name="featureHandleFullDiscError"/>
+\t\t\t\t\t\t\t\t<feature name="featureEnvironmentLock"/>
+\t\t\t\t\t\t\t\t<and abstract="true" name="Checkpointer">
+\t\t\t\t\t\t\t\t\t<feature name="featureCustomizableCheckpointerTime"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureCustomizableCheckpointerBytes"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureCheckpointerDaemon"/>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t\t<and abstract="true" name="Cleaner">
+\t\t\t\t\t\t\t\t\t<feature name="featureLookAheadCache"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureCleanerDaemon"/>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t</or>
+\t\t\t\t\t\t\t<alt abstract="true" mandatory="true" name="FIOFeature">
+\t\t\t\t\t\t\t\t<and abstract="true" name="NIO">
+\t\t\t\t\t\t\t\t\t<feature name="featureDirectNIO"/>
+\t\t\t\t\t\t\t\t\t<alt abstract="true" mandatory="true" name="FNIOType">
+\t\t\t\t\t\t\t\t\t\t<feature name="featureNIO"/>
+\t\t\t\t\t\t\t\t\t\t<feature name="featureChunkedNIO"/>
+\t\t\t\t\t\t\t\t\t</alt>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t\t<and abstract="true" name="IO">
+\t\t\t\t\t\t\t\t\t<feature name="featureSynchronizedIO"/>
+\t\t\t\t\t\t\t\t\t<feature mandatory="true" name="featureIO"/>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t</alt>
+\t\t\t\t\t\t</and>
+\t\t\t\t\t</alt>
+\t\t\t\t\t<alt abstract="true" name="FStatistics">
+\t\t\t\t\t\t<and abstract="true" name="Statistics">
+\t\t\t\t\t\t\t<or abstract="true" mandatory="true" name="FStatisticsFeatures">
+\t\t\t\t\t\t\t\t<and abstract="true" name="EnvStats">
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvLog"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvINCompressor"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvFSync"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvEvictor"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvCleaner"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvCheckpointer"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureStatisticsEnvCaching"/>
+\t\t\t\t\t\t\t\t\t<feature mandatory="true" name="featureStatisticsEnvBase"/>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t\t<feature name="featureStatisticsDatabase"/>
+\t\t\t\t\t\t\t\t<feature name="featureStatisticsLock"/>
+\t\t\t\t\t\t\t\t<feature name="featureStatisticsPreload"/>
+\t\t\t\t\t\t\t\t<feature name="featureStatisticsSequence"/>
+\t\t\t\t\t\t\t\t<feature name="featureStatisticsTransaction"/>
+\t\t\t\t\t\t\t</or>
+\t\t\t\t\t\t\t<feature mandatory="true" name="featureStatisticsBase"/>
+\t\t\t\t\t\t</and>
+\t\t\t\t\t</alt>
+\t\t\t\t\t<feature name="featureMemoryBudget"/>
+\t\t\t\t\t<or abstract="true" name="FConcurrency">
+\t\t\t\t\t\t<feature name="featureLatch"/>
+\t\t\t\t\t\t<feature name="featureFSync"/>
+\t\t\t\t\t\t<feature name="featureTransaction"/>
+\t\t\t\t\t\t<feature name="dummyFeatureLocking"/>
+\t\t\t\t\t\t<feature name="featureCheckLeaks"/>
+\t\t\t\t\t</or>
+\t\t\t\t\t<or abstract="true" name="FDbOperation">
+\t\t\t\t\t\t<feature name="featureDeleteDb"/>
+\t\t\t\t\t\t<feature name="featureTruncateDb"/>
+\t\t\t\t\t</or>
+\t\t\t\t\t<alt abstract="true" mandatory="true" name="FBtree">
+\t\t\t\t\t\t<and abstract="true" name="BTree">
+\t\t\t\t\t\t\t<feature name="featureVerifier"/>
+\t\t\t\t\t\t\t<feature name="featureTreeVisitor"/>
+\t\t\t\t\t\t\t<feature name="featureINCompressor"/>
+\t\t\t\t\t\t\t<alt abstract="true" name="FEvictor">
+\t\t\t\t\t\t\t\t<and abstract="true" name="Evictor">
+\t\t\t\t\t\t\t\t\t<feature name="featureCriticalEviction"/>
+\t\t\t\t\t\t\t\t\t<feature name="featureEvictorDaemon"/>
+\t\t\t\t\t\t\t\t\t<feature mandatory="true" name="featureEvictor"/>
+\t\t\t\t\t\t\t\t</and>
+\t\t\t\t\t\t\t</alt>
+\t\t\t\t\t\t</and>
+\t\t\t\t\t</alt>
+\t\t\t\t\t<feature mandatory="true" name="BASE"/>
+\t\t\t\t</and>
+\t\t\t</alt>
+\t\t</struct>
+\t\t<constraints>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<disj>
+\t\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t\t\t<disj>
+\t\t\t\t\t\t\t<var>featureEvictorDaemon</var>
+\t\t\t\t\t\t\t<disj>
+\t\t\t\t\t\t\t\t<var>featureLookAheadCache</var>
+\t\t\t\t\t\t\t\t<var>featureStatisticsEnvCaching</var>
+\t\t\t\t\t\t\t</disj>
+\t\t\t\t\t\t</disj>
+\t\t\t\t\t</disj>
+\t\t\t\t\t<var>featureMemoryBudget</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureCheckLeaks</var>
+\t\t\t\t\t<var>featureStatisticsLock</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureCriticalEviction</var>
+\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureCustomizableCheckpointerBytes</var>
+\t\t\t\t\t<var>featureCustomizableCheckpointerTime</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureDeleteDb</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>dummyFeatureLocking</var>
+\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t\t\t\t\t<var>featureMemoryBudget</var>
+\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t</conj>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureLatch</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>dummyFeatureLocking</var>
+\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t<var>featureCheckLeaks</var>
+\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t<var>featureDeleteDb</var>
+\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t<var>featureFileHandleCache</var>
+\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t<var>featureFSync</var>
+\t\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t<var>featureMemoryBudget</var>
+\t\t\t\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t<var>featureStatisticsLock</var>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<var>featureTreeVisitor</var>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<var>featureTruncateDb</var>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<var>featureVerifier</var>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t\t</conj>
+\t\t\t\t\t\t</conj>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureLoggingSevere</var>
+\t\t\t\t\t<var>featureEnvironmentLock</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureLoggingFine</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>dummyFeatureLocking</var>
+\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t\t\t</conj>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureLoggingInfo</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>featureChecksum</var>
+\t\t\t\t\t\t<var>featureMemoryBudget</var>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<disj>
+\t\t\t\t\t\t<var>featureLoggingBase</var>
+\t\t\t\t\t\t<var>featureLoggingFinest</var>
+\t\t\t\t\t</disj>
+\t\t\t\t\t<var>featureTransaction</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureMemoryBudget</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t\t\t<var>featureLatch</var>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<disj>
+\t\t\t\t\t\t<var>featureStatisticsLock</var>
+\t\t\t\t\t\t<var>featureStatisticsTransaction</var>
+\t\t\t\t\t</disj>
+\t\t\t\t\t<var>dummyFeatureLocking</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureStatisticsEnvEvictor</var>
+\t\t\t\t\t<var>featureEvictor</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureStatisticsEnvFSync</var>
+\t\t\t\t\t<var>featureFSync</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureStatisticsEnvINCompressor</var>
+\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureStatisticsTransaction</var>
+\t\t\t\t\t<var>featureTransaction</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureStatisticsDatabase</var>
+\t\t\t\t\t<var>featureTreeVisitor</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureTransaction</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>dummyFeatureLocking</var>
+\t\t\t\t\t\t<conj>
+\t\t\t\t\t\t\t<var>featureDeleteDb</var>
+\t\t\t\t\t\t\t<var>featureTruncateDb</var>
+\t\t\t\t\t\t</conj>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureTruncateDb</var>
+\t\t\t\t\t<var>featureDeleteDb</var>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t\t<rule>
+\t\t\t\t<imp>
+\t\t\t\t\t<var>featureVerifier</var>
+\t\t\t\t\t<conj>
+\t\t\t\t\t\t<var>featureINCompressor</var>
+\t\t\t\t\t\t<var>featureTreeVisitor</var>
+\t\t\t\t\t</conj>
+\t\t\t\t</imp>
+\t\t\t</rule>
+\t\t</constraints>
+\t\t<calculations Auto="true" Constraints="true" Features="true" Redundant="true" Tautology="true"/>
+\t\t<comments>
+\t\t\t<c>Semantic Dependencies</c>
+\t\t</comments>
+\t\t<featureOrder userDefined="false"/>
+\t</featureModel>
 `;

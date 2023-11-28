@@ -296,8 +296,8 @@
                             Drop your FeatureModel file here, or click to select it.
                         </p>
                         <v-btn class="mt-6 text-h4 " color="primary" rounded="xl" variant="text"
-                               @click.stop="openFromLocalStorage">
-                            Or click here to load it from your local storage.
+                               @click.stop="openExampleModel">
+                            Or click here to load an example.
                         </v-btn>
                     </v-row>
                 </v-card-text>
@@ -355,6 +355,9 @@ import {reColorNode} from '@/services/Configurator/update.service';
 import Navbar from '@/components/Navbar.vue';
 import {decisionPropagationFL, pingFL} from "@/classes/BackendAccess/FlaskAccess";
 import {decisionPropagationFIDE, pingFIDE} from "@/classes/BackendAccess/FeatureIDEAccess";
+import {EXAMPLE_FEATURE_MODEL_XML} from "@/classes/constants";
+import BerkeleyDB from "@/assets/BerkeleyDB.xml";
+import axios from "axios";
 
 const appStore = useAppStore();
 export default {
@@ -416,7 +419,7 @@ export default {
     },
 
     created() {
-        if(this.id === 'edit'){
+        if (this.id === 'edit') {
             this.openFromLocalStorage();
         } else if (this.id) {
             this.initData();
@@ -436,10 +439,11 @@ export default {
 
     methods: {
         initData() {
+            this.fmIsLoaded = true;
             api.get(`${import.meta.env.VITE_APP_DOMAIN}files/${this.id}/`).then(
                 (data) => {
                     api.get(data.data.local_file).then((rawData) => {
-                        this.xml = beautify(rawData.data);
+                        this.xml = rawData.data;
                         this.featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                         this.features = this.featureModelSolo.features;
                         this.updateFeatures()
@@ -457,6 +461,28 @@ export default {
                     });
                 }
             );
+        },
+
+         async openExampleModel() {
+            this.fmIsLoaded = true;
+            let xmlFile = await axios.get(BerkeleyDB);
+            this.xml = xmlFile.data;
+            const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
+            this.commandManager = new ConfiguratorManager();
+            this.features = featureModelSolo.features;
+            this.updateFeatures();
+            this.featureModelName = "BerkeleyDB";
+            featureModelSolo.name = this.featureModelName;
+            this.allConstraints = featureModelSolo.constraints.map((e) => ({
+                constraint: e,
+                formula: e.toList(),
+                evaluation: e.evaluate()
+            }));
+            this.filteredConstraints = this.allConstraints;
+            this.featureModelSolo = featureModelSolo;
+            const selectionData = await this.getSelectionDataFromAPI();
+            this.initialResetCommand = new ResetCommand(this.featureModelSolo, selectionData);
+            this.initialResetCommand.execute();
         },
 
         save() {
