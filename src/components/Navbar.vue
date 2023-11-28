@@ -71,15 +71,6 @@
             >
                 Redo
             </v-btn>
-
-            <v-btn
-                    :disabled="!properties.commandManager.isRedoAvailable()"
-                    class="mx-1"
-                    prepend-icon="mdi-redo"
-                    @click='properties.commandManager.redo()'
-            >
-                Redo
-            </v-btn>
             <v-btn
                     :prepend-icon="properties.serviceIsWorking ? 'mdi-wifi' : 'mdi-wifi-off'"
                     class="mx-1"
