@@ -62,7 +62,7 @@ export class FeatureModelSolo {
 
         for (const child of struct.childNodes) {
             // To remove #text nodes, as they don't have a tagName
-            if (child.tagName) {
+            if (child.tagName && child.tagName !=='description') {
                 const featureName = child.getAttribute('name');
                 let toAppend = new FeatureNode(
                     parent,
