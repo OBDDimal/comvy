@@ -473,7 +473,7 @@ export default {
 
         redirectToEditor() {
             localStorage.featureModelData = this.xml;
-            window.location = "https://variability.dev/editor/model"
+            window.location = "https://variability.dev/editor/local"
         },
 
         downloadXML() {
