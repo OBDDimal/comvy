@@ -57,6 +57,21 @@ export class FeatureNode {
         return undefined;
     }
 
+    selectionType() {
+        if (this.open) {
+            return "choice"
+        } else if (this.selectionState === SelectionState.ExplicitlySelected) {
+            return "selected-expl"
+        } else if (this.selectionState === SelectionState.ImplicitlySelected) {
+            return "selected-impl";
+        } else if (this.selectionState === SelectionState.ExplicitlyDeselected) {
+            return "deselected-expl";
+        } else if (this.selectionState === SelectionState.ImplicitlyDeselected) {
+            return "deselected-impl";
+        }
+        return undefined;
+    }
+
 
     level() {
         if (this.isRoot) {

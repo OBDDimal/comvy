@@ -1,22 +1,37 @@
 import * as d3 from "d3";
 
-export function reset(d3Data, uncollapsedLevels = 4, maxChildrenCount = 3) {
+export function reset(d3Data, uncollapsedLevels = 0, maxChildrenCount = 3) {
     // Collapses all nodes after depth 1.
     d3Data.root.data.each(node => node.collapse());
 
     let currentChildren = [d3Data.root.data];
-    for (let i = 1; i <= uncollapsedLevels; i++) {
-        currentChildren.forEach(child => {
-            if (child.children.length <= maxChildrenCount) {
-                child.uncollapse(false);
-            }
-        });
-        currentChildren = currentChildren
-            .map(parent => parent.children.length <= maxChildrenCount ? parent.children : [])
-            .flat();
+    if (uncollapsedLevels !== 0) {
+        for (let i = 1; i <= uncollapsedLevels; i++) {
+            currentChildren.forEach(child => {
+                if (child.children.length <= maxChildrenCount) {
+                    child.uncollapse(false);
+                }
+            });
+            currentChildren = currentChildren
+                .map(parent => parent.children.length <= maxChildrenCount ? parent.children : [])
+                .flat();
 
-        if (currentChildren.length === 0) {
-            break;
+            if (currentChildren.length === 0) {
+                break;
+            }
+        }
+    } else {
+        for (let i = 1; i < 4; i++) {
+
+            currentChildren.forEach(child => {
+                child.uncollapse(false);
+            });
+            currentChildren = currentChildren.map(parent => parent.children)
+                .flat();
+
+            if (currentChildren.length === 0) {
+                break;
+            }
         }
     }
 }

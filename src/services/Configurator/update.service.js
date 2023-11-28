@@ -75,8 +75,9 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
     rectAndTextUpdate
         .select('rect')
         .classed('is-searched-feature', (d3Node) => d3Node.data.isSearched)
+        .classed('feature', true)
+        .classed('selected-expl', true)
         .attr('id', (d3Node) => d3Node.data.name)
-        .attr('fill', (d3Node) => d3Node.data.color(d3Data.dark))
         .attr('x', (d3Node) =>
             d3Data.direction === 'v' ? -d3Node.width / 2 : 0
         )
@@ -84,16 +85,16 @@ function updateFeatureNodes(d3Data, visibleD3Nodes) {
         .attr('width', (d3Node) => d3Node.width);
     rectAndTextUpdate
         .select('text')
-        .attr('font-style', (d3Node) =>
-            d3Node.data.isAbstract ? 'italic' : 'normal'
-        )
+        .classed('abstract', (d3Node) => d3Node.data.isAbstract)
         .attr(
             'dy',
             d3Data.direction === 'v' ? CONSTANTS.RECT_HEIGHT / 2 + 5.5 : 5.5
         )
         .attr('x', d3Data.direction === 'v' ? 0 : (d3Node) => d3Node.width / 2)
         .classed('whiteText', (d3Node) => {
-            return !d3Data.dark;
+            let color = d3Node.data.color();
+            const rgb = color.replace(/[^\d,]/g, '').split(',');
+            return rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114 <= 186;
         })
         .text((d3Node) =>
             d3Data.isShortenedName ? d3Node.data.displayName : d3Node.data.name
@@ -290,7 +291,7 @@ function updateSelectionHighlight(d3Data, visibleD3Nodes) {
             d3Node: d3Node,
             feature: d3Node.data,
         }))
-        .filter((d) => d.feature.selectionState !== SelectionState.Unselected);
+        .filter((d) => d.feature.selectionState !== SelectionState.Unselected || d.feature.open);
 
     const selectedFeatureNodes =
         d3Data.container.selectedFeatureContainer
@@ -320,13 +321,14 @@ function updateSelectionHighlight(d3Data, visibleD3Nodes) {
     const selectedFeatureNodesRectsEnter = selectedFeatureNodesRects
         .enter()
         .append('rect')
-        .attr('stroke-width', CONSTANTS.STROKE_WIDTH_CONSTANT)
         .attr('fill', 'transparent');
 
     // Update highlighted constraint rects
     selectedFeatureNodesRectsEnter
         .merge(selectedFeatureNodesRects)
-        .attr('stroke', (json) => json.feature.selectionColor(d3Data.dark))
+        .attr('class', (json) => {
+            return json.feature.selectionType();
+        })
         .attr('x', (json) =>
             d3Data.direction === 'v' ? -json.d3Node.width / 2 : 0
         )

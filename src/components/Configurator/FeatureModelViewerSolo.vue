@@ -86,9 +86,9 @@ export default {
     methods: {
         init() {
             init.initialize(this.d3Data, this.featureModel.root, true)
-            this.resetView(3, 7);
+            this.resetView();
         },
-        resetView(levels, maxChildren) {
+        resetView(levels = 0, maxChildren = 4) {
             view.reset(this.d3Data, levels, maxChildren)
             update.updateSvg(this.d3Data);
             zoomFit(this.d3Data);
@@ -338,5 +338,60 @@ polygon {
       }
     }
   }
+}
+
+.feature {
+    font-family: sans-serif;
+    display: inline-block;
+    fill: #ebebff;
+    border: 2px solid #999999;
+    padding: 0.5rem;
+}
+
+.abstract {
+    font-style: italic;
+}
+
+.dead {
+    text-decoration: line-through;
+}
+
+.core {
+    text-decoration: underline;
+}
+
+.false-optional {
+    stroke: #FF4500;
+    stroke-width: 1.5px;
+}
+
+
+.selected-expl {
+    stroke: #31a354;
+    stroke-width: 4px;
+}
+
+.selected-impl {
+    stroke: #a1d99b;
+    stroke-width: 4px;
+}
+
+.deselected-expl {
+    stroke: #d01c8b;
+    stroke-width: 4px;
+    stroke-dasharray: 5;
+}
+
+.deselected-impl {
+    stroke: #f1b6da;
+    stroke-width: 4px;
+    stroke-dasharray: 5;
+}
+
+.choice {
+    stroke: #0058B3;
+    stroke-width: 4px;
+    stroke-dasharray: 1;
+    shape-rendering: crispEdges;
 }
 </style>
