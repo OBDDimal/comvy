@@ -416,7 +416,9 @@ export default {
     },
 
     created() {
-        if (this.id) {
+        if(this.id === 'edit'){
+            this.openFromLocalStorage();
+        } else if (this.id) {
             this.initData();
         }
         this.setStartService();
