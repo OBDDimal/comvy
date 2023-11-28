@@ -186,8 +186,8 @@
 
                         <!-- Tabs to select (Feature Model Viewer, List Tree, Cross-Tree Constraints -->
                         <v-tabs v-model='tabsSecondColumn'>
-                            <v-tab key='featureModelViewer'>Feature Model Viewer</v-tab>
-                            <v-tab key='ctc'>Cross Tree Constraints</v-tab>
+                            <v-tab key='featureModelViewer'>Feature-Model Viewer</v-tab>
+                            <v-tab key='ctc'>Cross-Tree Constraints</v-tab>
                             <v-tab key='conf'>Configuration History</v-tab>
                         </v-tabs>
 
