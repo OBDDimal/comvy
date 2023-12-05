@@ -67,8 +67,6 @@ export default {
         const dark = this.$vuetify.theme.global.current.dark;
         if (this.selectionItem.open) {
             return dark ? variabilityDarkTheme.colors["should-select"] : variabilityLightTheme.colors["should-select"];
-        } else if (this.selectionItem.open !== null) {
-            return dark ? variabilityDarkTheme.colors["should-select-parent"] : variabilityLightTheme.colors["should-select-parent"];
         } else if (this.selectionItem.selectionState === SelectionState.ExplicitlySelected) {
             return dark ? variabilityDarkTheme.colors.selected : variabilityLightTheme.colors.selected;
         } else if (this.selectionItem.selectionState === SelectionState.ImplicitlyDeselected) {

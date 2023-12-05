@@ -21,7 +21,7 @@ export const variabilityLightTheme = {
         'imp-selected': '#a1d99b',
         deselected: '#ff210d',
         'imp-deselected': '#c50000',
-        'should-select': '#cca000',
+        'should-select': '#0058B3',
         'should-select-parent': '#c46300'
     },
 }
@@ -38,11 +38,11 @@ export const variabilityDarkTheme = {
         success: '#4CAF50',
         'on-success': '#1a1c1e',
         warning: '#FB8C00',
-        selected: '#96d200',
-        'imp-selected': '#277800',
-        deselected: '#fe0058',
-        'imp-deselected': '#9d004d',
-        'should-select': '#ff5d1b',
+        selected: '#31a354',
+        'imp-selected': '#a1d99b',
+        deselected: '#ff210d',
+        'imp-deselected': '#c50000',
+        'should-select': '#0058B3',
         'should-select-parent': '#cc3a00',
     },
 }
