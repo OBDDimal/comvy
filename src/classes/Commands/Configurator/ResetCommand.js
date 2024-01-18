@@ -1,5 +1,5 @@
 import {ConfigurationCommand} from "@/classes/Commands/Configurator/ConfigurationCommand";
-import api from "@/services/api.service";
+
 
 export class ResetCommand extends ConfigurationCommand {
     constructor(featureModel ) {

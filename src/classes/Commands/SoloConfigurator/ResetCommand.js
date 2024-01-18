@@ -1,5 +1,4 @@
 import {ConfigurationCommand} from '@/classes/Commands/SoloConfigurator/ConfigurationCommand';
-import axios from 'axios';
 import {SelectionState} from "@/classes/Configurator/SelectionState";
 
 export class ResetCommand extends ConfigurationCommand {

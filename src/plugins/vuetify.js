@@ -1,8 +1,6 @@
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import {createVuetify} from 'vuetify';
-import {VDataTable} from 'vuetify/labs/VDataTable';
-import {VBottomSheet} from 'vuetify/labs/VBottomSheet';
 
 export const variabilityLightTheme = {
     dark: false,
@@ -54,10 +52,6 @@ export default createVuetify({
             variabilityLightTheme,
             variabilityDarkTheme
         }
-    },
-    components: {
-        VDataTable,
-        VBottomSheet
     },
 });
 /*{

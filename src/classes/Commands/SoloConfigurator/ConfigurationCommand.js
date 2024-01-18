@@ -1,6 +1,6 @@
 import {Command} from "@/classes/Commands/Command";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
-import {updateSvg} from "@/services/Configurator/update.service";
+import {updateSvg} from "cofmed/src/services/FeatureModel/update.service";
 
 export class ConfigurationCommand extends Command {
     constructor(featureModel) {

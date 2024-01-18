@@ -347,8 +347,8 @@ import {RollbackFixVersionCommand} from '@/classes/Commands/Configurator/Rollbac
 import {RollbackFixCTCCommand} from '@/classes/Commands/Configurator/RollbackFixCTCCommand';
 import {DecisionPropagationCommand} from '@/classes/Commands/SoloConfigurator/DecisionPropagationCommand';
 import {ca, tr} from 'vuetify/locale';
-import api from '@/services/api.service';
 import {Feature} from '@/classes/Configurator/Feature';
+import api from "cofmed/src/services/api.service";
 import {FeatureNodeConstraintItem} from '@/classes/Constraint/FeatureNodeConstraintItem';
 import {SelectionState} from '@/classes/Configurator/SelectionState';
 import ConfiguratorOpenFileDialog from '@/components/Configurator/ConfiguratorOpenFileDialog.vue';
@@ -356,12 +356,11 @@ import FeatureModelViewerSolo from '@/components/Configurator/FeatureModelViewer
 import {FeatureModelSolo} from '@/classes/Configurator/FeatureModelSolo';
 import {useAppStore} from '@/store/app';
 import {ResetCommand} from '@/classes/Commands/SoloConfigurator/ResetCommand';
-import beautify from 'xml-beautifier';
 import {LoadConfigCommand} from '@/classes/Commands/SoloConfigurator/LoadConfigCommand';
-import {reColorNode} from '@/services/Configurator/update.service';
 import Navbar from '@/components/Navbar.vue';
 import {decisionPropagationFL, pingFL} from "@/classes/BackendAccess/FlaskAccess";
 import {decisionPropagationFIDE, pingFIDE} from "@/classes/BackendAccess/FeatureIDEAccess";
+import beautify from "xml-beautifier";
 
 const appStore = useAppStore();
 export default {

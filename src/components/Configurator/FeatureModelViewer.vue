@@ -3,12 +3,12 @@
 </template>
 
 <script>
-import * as update from '@/services/Configurator/update.service.js'
-import * as init from '@/services/FeatureModel/init.service.js'
-import * as view from '@/services/FeatureModel/view.service.js'
-import * as search from '@/services/FeatureModel/search.service.js'
+import * as view from "cofmed/src/services/FeatureModel/view.service";
+import * as update from "cofmed/src/services/FeatureModel/update.service";
+import * as init from "cofmed/src/services/FeatureModel/init.service";
+import * as search from "cofmed/src/services/FeatureModel/search.service";
+import {zoomFit} from "cofmed/src/services/FeatureModel/view.service";
 import {Version} from "@/classes/Configurator/Version";
-import {zoomFit} from "@/services/FeatureModel/view.service.js";
 
 export default {
   name: 'FeatureModelViewer',

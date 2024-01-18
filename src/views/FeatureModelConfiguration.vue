@@ -590,7 +590,6 @@ import DoubleCheckbox from '@/components/Configurator/DoubleCheckbox.vue';
 import FeatureModelViewer from '@/components/Configurator/FeatureModelViewer.vue';
 import { ConfiguratorManager } from '@/classes/Configurator/ConfiguratorManager';
 import { FeatureModel } from '@/classes/Configurator/FeatureModel';
-import api from "@/services/api.service";
 import {QuickFixFeatureCommand} from "@/classes/Commands/Configurator/QuickFixFeatureCommand";
 import {QuickFixCTCCommand} from "@/classes/Commands/Configurator/QuickFixCTCCommand";
 import {RollbackFixFeatureCommand} from "@/classes/Commands/Configurator/RollbackFixFeatureCommand";

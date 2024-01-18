@@ -1,6 +1,5 @@
 import {ConfigurationCommand} from "@/classes/Commands/Configurator/ConfigurationCommand";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
-import api from "@/services/api.service";
 import {Version} from "@/classes/Configurator/Version";
 
 export class DecisionPropagationCommand extends ConfigurationCommand {

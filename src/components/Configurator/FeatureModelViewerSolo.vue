@@ -13,13 +13,13 @@ defineExpose({
 </script>
 
 <script>
-import * as update from '@/services/Configurator/update.service.js'
-import * as init from '@/services/FeatureModel/init.service.js'
-import * as view from '@/services/FeatureModel/view.service.js'
-import * as search from '@/services/FeatureModel/search.service.js'
-import {zoomFit} from "@/services/FeatureModel/view.service.js";
-import {FeatureModelSolo} from '@/classes/Configurator/FeatureModelSolo';
 
+import {FeatureModelSolo} from '@/classes/Configurator/FeatureModelSolo';
+import * as view from "cofmed/src/services/FeatureModel/view.service";
+import * as update from "cofmed/src/services/FeatureModel/update.service";
+import * as init from "cofmed/src/services/FeatureModel/init.service";
+import * as search from "cofmed/src/services/FeatureModel/search.service";
+import {zoomFit} from "cofmed/src/services/FeatureModel/view.service";
 export default {
     name: 'FeatureModelViewer',
 
@@ -48,6 +48,7 @@ export default {
             direction: 'v', // h = horizontally, v = vertically
             maxHorizontallyLevelWidth: [],
             dark: false,
+            isConf: true,
         },
         search: {
             showSearch: false,

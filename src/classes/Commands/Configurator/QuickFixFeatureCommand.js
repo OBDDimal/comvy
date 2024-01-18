@@ -1,7 +1,5 @@
 import {ConfigurationCommand} from "@/classes/Commands/Configurator/ConfigurationCommand";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
-import api from "@/services/api.service";
-
 export class QuickFixFeatureCommand extends ConfigurationCommand {
     constructor(featureModel, feature) {
         super(featureModel);

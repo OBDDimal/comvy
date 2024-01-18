@@ -1,4 +1,4 @@
-import {updateSvg} from "@/services/Configurator/update.service";
+import {updateSvg} from "cofmed/src/services/FeatureModel/update.service";
 
 export class ConfiguratorManager {
     constructor() {

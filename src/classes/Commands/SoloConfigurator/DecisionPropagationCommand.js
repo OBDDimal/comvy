@@ -1,7 +1,5 @@
 import {ConfigurationCommand} from "@/classes/Commands/SoloConfigurator/ConfigurationCommand";
 import {SelectionState} from "@/classes/Configurator/SelectionState";
-import axios from 'axios';
-import {de} from "vuetify/locale";
 
 export class DecisionPropagationCommand extends ConfigurationCommand {
     constructor(featureModel, data, feature, newSelectionState, validCheckbox) {

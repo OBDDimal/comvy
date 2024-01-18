@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import authService from '@/services/auth.service';
-import api from '@/services/api.service';
+import authService from 'cofmed/src/services/auth.service';
+import api from 'cofmed/src/services/api.service';
 import { useAppStore } from '@/store/app';
 
 const API_URL = import.meta.env.VITE_APP_DOMAIN;
