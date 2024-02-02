@@ -36,7 +36,7 @@
                     >
                     </v-list-item>
                     <v-list-item v-if='properties.fileIsLoaded' prepend-icon="mdi-file-edit"
-                                 title='Open in Editor' @click='$emit("openEdit")'
+                                 title='Switch to Editor' @click='$emit("openEdit")'
                     >
                     </v-list-item>
                     <v-list-item v-if='properties.fileIsLoaded' prepend-icon="mdi-content-save"
