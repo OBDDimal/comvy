@@ -419,7 +419,7 @@ export default {
     },
 
     created() {
-        if (this.id === 'edit') {
+        if (this.id === 'local') {
             this.openFromLocalStorage();
         } else if (this.id) {
             this.initData();
@@ -499,7 +499,8 @@ export default {
 
         redirectToEditor() {
             localStorage.featureModelData = this.xml;
-            window.location = "https://variability.dev/editor/local"
+            window.location = "https://editor.variability.dev/local"
+            //
         },
 
         downloadXML() {
