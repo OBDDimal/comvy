@@ -303,7 +303,7 @@
                 </v-card-text>
                 <input
                         ref="filePicker"
-                        accept=".xml"
+                        accept=".xml, .uvl, .dimacs"
                         class="d-none"
                         type="file"
                         @change="onFileInputChanged"
@@ -463,7 +463,7 @@ export default {
             );
         },
 
-         async openExampleModel() {
+        async openExampleModel() {
             this.fmIsLoaded = true;
             let xmlFile = await axios.get(BerkeleyDB);
             this.xml = xmlFile.data;
@@ -626,8 +626,22 @@ export default {
 
         async openFile(files) {
             this.fmIsLoaded = true;
-            const data = await files[0].text();
+            let data = await files[0].text();
+
             try {
+                const fileExtension = files[0].name.split('.').pop();
+                if (fileExtension === 'uvl' || fileExtension === 'dimacs') {
+                    data = await this.changeFileFormat(data, fileExtension, 'featureIde');
+                } else if (fileExtension !== 'xml') {
+                    appStore.updateSnackbar(
+                        'Could not load the feature model, because filetype is not supported.',
+                        'error',
+                        3000,
+                        true
+                    );
+                    this.fmIsLoaded = false;
+                    return;
+                }
                 this.xml = data;
                 const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                 this.commandManager = new ConfiguratorManager();
@@ -656,6 +670,17 @@ export default {
                 this.fmIsLoaded = false;
             }
             this.showOpenDialog = false;
+        },
+
+        async changeFileFormat(text, fileExtension, newFileExtension) {
+            const content = new TextEncoder().encode(text);
+            let response = await axios.post(`${import.meta.env.VITE_APP_DOMAIN_FEATUREIDESERVICE}convert`, {
+                name: 'hello.' + fileExtension,
+                typeOutput: [newFileExtension],
+                content: Array.from(content)
+            });
+            let contentAsString = new TextDecoder().decode(Uint8Array.from(response.data.content[0]));
+            return contentAsString;
         },
 
         openConfig(file) {
