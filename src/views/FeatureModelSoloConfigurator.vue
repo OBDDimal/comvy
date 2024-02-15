@@ -642,6 +642,10 @@ export default {
                     this.fmIsLoaded = false;
                     return;
                 }
+                if (data === '') {
+                    this.fmIsLoaded = false;
+                    return;
+                }
                 this.xml = data;
                 const featureModelSolo = FeatureModelSolo.loadXmlDataFromFile(this.xml);
                 this.commandManager = new ConfiguratorManager();
@@ -680,6 +684,16 @@ export default {
                 content: Array.from(content)
             });
             let contentAsString = new TextDecoder().decode(Uint8Array.from(response.data.content[0]));
+
+            if (contentAsString.trim().toLowerCase() === text.trim().toLowerCase()) {
+                    appStore.updateSnackbar(
+                        'Could not convert the feature model, because feature model is not supported.',
+                        'error',
+                        3000,
+                        true
+                    );
+                    return '';
+                }
             return contentAsString;
         },
 
